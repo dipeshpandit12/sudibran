@@ -16,6 +16,7 @@
 # It holds no bank, CRS or model-parser key, and can't reach the broker's network.
 
 x-app: &app
+  image: sudibran-backend:local
   build: .
   restart: unless-stopped
   volumes:
@@ -73,6 +74,15 @@ services:
       opa: { condition: service_started }
       broker: { condition: service_started }
       parser: { condition: service_started }
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health', timeout=2)"
+      interval: 5s
+      timeout: 3s
+      retries: 30
     networks: [public, db, policy, payments, parsing, proxy_gate, raw, egress]
 
   broker:
