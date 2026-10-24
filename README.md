@@ -2,9 +2,9 @@
 
 **The black box for AI financial actions.** Sudibran is a security layer that sits between an AI agent and the money. It records what the person actually asked for, checks every step the agent takes, blocks any payment they didn't authorise, and keeps a tamper-evident record of every decision.
 
-This repository is the **web prototype** built for Cal Hacks 13.0 (FinTech track). It tells the whole story in the browser: how an AI agent pays an invoice, how that agent can be attacked at every layer, how Sudibran stops each attack, and the audit trail that proves it.
+This repository is the **web application** built for Cal Hacks 13.0 (FinTech track). It tells the whole story in the browser: how an AI agent pays an invoice, how that agent can be attacked at every layer, how Sudibran stops each attack, and the audit trail that proves it.
 
-> **Prototype status.** Everything runs locally from JSON files. No Claude, Nessie or CRS calls are made. A small mock backend inside Next.js reads the scenario files, keeps state in memory, and computes a real SHA-256 hash chain. Every result is correct *by assumption*: it shows exactly how Sudibran behaves, but it is not proof that the real integrations work. Say so if a judge asks what is real and what is simulated.
+> **Backend status.** Every `/api/*` request is proxied to the FastAPI gate. The browser therefore uses the policy, audit, Claude/Droid, CRS and Nessie integration modes reported by the backend's `/api/health` endpoint. There are no local Next.js API handlers or executable seed/scenario fixtures.
 
 ---
 
@@ -32,14 +32,22 @@ This repository is the **web prototype** built for Cal Hacks 13.0 (FinTech track
 
 ## Quick start
 
-**Requirements:** Node.js 20.9 or newer (developed on Node 26) and npm. No API keys, database or internet connection are needed once dependencies are installed.
+**Requirements:** Node.js 20.9 or newer, npm, and the sibling `sudinbran-backend` project configured as described in its README.
 
 ```bash
+# Terminal 1
+cd ../sudinbran-backend
+uv run uvicorn app.main:app --reload --port 8000
+
+# Terminal 2
+cd ../sudibran-web
 npm install
 npm run dev
 ```
 
 Open <http://localhost:3000>. The old `/demo` URL redirects to the dashboard.
+
+Next.js proxies `/api/*` to `http://127.0.0.1:8000` by default. For another backend address, copy `.env.example` to `.env.local` and set `SUDIBRAN_BACKEND_URL`. This variable is server-only and must not use the `NEXT_PUBLIC_` prefix.
 
 | Command | What it does |
 |---|---|
@@ -49,7 +57,7 @@ Open <http://localhost:3000>. The old `/demo` URL redirects to the dashboard.
 | `npm run lint` | ESLint (Next.js + TypeScript rules) |
 | `npx tsc --noEmit` | Type-check only |
 
-**Resetting.** All state lives in memory, so restarting the dev server, or choosing **Controls → Reset session** on the dashboard, returns everything to `data/seed.json`. You can also call `POST /api/demo/reset`.
+**Resetting.** Choosing **Controls → Reset session** calls the backend's `POST /api/demo/reset`, which resets and reseeds its database. Restarting only the Next.js server does not reset backend state.
 
 **If the page looks stale** (for example styles that don't update), stop the server, delete `.next/`, and start it again. A nearly full disk stops the dev server writing its build files; keep at least a few GB free.
 
@@ -104,25 +112,24 @@ A list of every run with filters (stopped, needs review, paid) and a chain-integ
  Browser (React, client components)
    │  every page calls the same client: lib/api.ts
    ▼
- Next.js route handlers  app/api/*            ← one file per endpoint
+ Next.js beforeFiles rewrite  /api/* → SUDIBRAN_BACKEND_URL/api/*
    │
    ▼
- lib/store.ts  (server only)
-   ├─ loads data/seed.json on start / reset
-   ├─ runs a scenario from data/scenarios/*.json
-   │    applies switches: assume breach · layer off · audit down
-   ├─ stamps each event: seq, time, actor, labels, prev_hash, hash (SHA-256)
-   ├─ updates balances, payments, approvals, components, chat, score
-   └─ keeps everything in memory (survives hot reload via globalThis)
+ FastAPI gate  sudinbran-backend/app/main.py
+   ├─ runs scripted presets or the live parser/planner pipeline
+   ├─ enforces CRS, policy, audit and broker checks
+   ├─ moves sandbox money through Nessie when configured
+   ├─ stamps each event into the hash-chained audit log
+   └─ persists state in SQLite locally or Postgres in Docker Compose
 ```
 
 **Replay.** A run returns all its events at once. The UI replays them on a timer (about one second per step, `lib/replay.ts`) so the progress bar and map animate as if live. Approving a payment appends more events to the same run and the replay continues from where it stopped.
 
-**Two sides of every run.** Each scenario file describes both outcomes: `raw` drives the unprotected agent (its steps and the harm), and `protected` drives Sudibran (its events, where it caught the attack, the rule and the result).
+**Two sides of every run.** For deterministic presets, backend-owned scenario files describe both outcomes: `raw` drives the unprotected agent and `protected` drives Sudibran. Free text is processed by the backend's live pipeline. The frontend receives only the resulting API response.
 
-**Swapping in the real backend later.** Pages only talk to `/api/...` through `lib/api.ts`. Pointing those paths at the real gateway (see `docs/backend_implementation_plan.md`) needs no page changes.
+**Backend routing.** Pages only talk to same-origin `/api/...` paths through `lib/api.ts`. A `beforeFiles` rewrite in `next.config.ts` proxies every request to FastAPI.
 
-**Next.js notes.** This uses Next.js 16 (App Router, Turbopack, React 19, React Compiler). Cache Components is deliberately **off** in `next.config.ts` because the mock backend keeps state in memory and every route must run at request time. Dynamic route params are read with `await ctx.params`.
+**Next.js notes.** This uses Next.js 16 (App Router, Turbopack, React 19, React Compiler). The backend URL is read only by the Next.js server and is never bundled into browser code.
 
 ---
 
@@ -164,28 +171,15 @@ On the dashboard, **Controls** (in the test section) holds three switches and a 
 | **Assume breach** (on by default) | Forces the planner to follow every injected instruction, as if the model were fully fooled. Sudibran doesn't rely on the model resisting. Turning it off lets the model refuse on its own, on both sides, so the run shows honestly that nothing guarantees it next time. |
 | **Switch off one check** | Disables one check to show the next layer still catches the attack. Options: untrusted-paste tagging, agent report check (R3), parser privilege split, memory source tags, payee from records (R2), private data egress, tool fingerprint, CRS fraud check (R7). If the check isn't on that attack's path, nothing changes and the run says so. |
 | **Audit log down** | Any payment that would go through, or wait for approval, goes **on hold** instead (R4). A grey banner appears on every page. |
-| **Reset session** | Reloads `data/seed.json`: balances, payments, approvals, components, chat, score and the audit chain. |
+| **Reset session** | Calls the FastAPI reset endpoint to reseed balances, payments, approvals, components, chat, score and the audit chain. |
 
 ---
 
 ## Testing your own injection
 
-Text typed into **Write your own** is sent to `POST /api/inject`. Because there are no live models, `classifyInjection` in `lib/scenarios.ts` matches it by keywords to the closest known attack, in this order:
+Text typed into **Write your own** is sent to the FastAPI `POST /api/inject` endpoint. With the backend's default `INJECT_MODE=live`, the text goes through the configured parser, planner, memory, CRS and policy checks. Exact preset text still uses the deterministic attack/story endpoints so the rehearsed demonstration remains repeatable.
 
-| If the text mentions… | It runs |
-|---|---|
-| "admin note", "without approval", "skip approval" | A1 |
-| "maintenance mode", "ignore … rules/instructions", "system:", "jailbreak", "developer mode" | A2 |
-| "remember", "for next time", "save to memory" | A4 |
-| "account changed", "new (bank) account", "updated bank details" | `side_by_side_140` |
-| "already approved", "approved by phone", "pre-approved" | A5 |
-| "tool description", "before paying, also" | A6 |
-| "hidden", "white text", "invisible" | A7 |
-| "supplier list", "bank details", "send … list/accounts/records", "email … @", "export all" | A8 |
-| "also pay", "pay account/to", a masked account like `****1234`, "transfer", "wire", "send $" | A3 |
-| anything else | `custom` (held for review) |
-
-Your own wording is what's shown on screen and stored in the audit trail. Injections are limited to 600 characters.
+Your own wording is shown on screen and stored in the backend audit trail. Injections are limited to 600 characters.
 
 ---
 
@@ -223,23 +217,24 @@ rule · off · actor · labels · payment_id · prev_hash · hash
 
 ## API reference
 
-All routes are Next.js route handlers under `app/api/`. They return JSON; errors return `{ "error": "…" }` with a 4xx status.
+All browser requests use same-origin `/api/*` paths and are proxied by Next.js to FastAPI. Errors return `{ "error": "…" }` with a 4xx status. FastAPI's complete typed API is available at <http://localhost:8000/docs>.
 
 | Method | Path | Does |
 |---|---|---|
 | GET | `/api/state` | The whole current state (intent, suppliers, components, balances, invoices, payments, approvals, chat, switches, score, runs, audit length) |
 | GET | `/api/components` | Connected components |
 | GET | `/api/checks` | Checks that can be switched off |
+| GET | `/api/scenarios` | Preset labels and input text; no scripted outcomes |
 | POST | `/api/intents` | Save and sign Maya's intent: `{ text, threshold_usd }` |
 | GET · POST | `/api/chat` | Chat messages; POST `{ text, pasted? }` adds a message and a scripted reply |
 | GET | `/api/invoices` · `/api/payments` · `/api/approvals` | Lists |
 | POST | `/api/approvals/[id]` | Approve or reject: `{ action: "approve" \| "reject" }` |
-| GET | `/api/attacks` | `data/attacks.json` |
+| GET | `/api/attacks` | Attack titles, layers and descriptions from the backend |
 | POST | `/api/attacks/[id]` | Run attack `A1`–`A9` on both sides → `RunResult` |
 | POST | `/api/story/[id]` | Run `normal_90`, `above_threshold` or `side_by_side_140` → `RunResult` |
 | POST | `/api/inject` | Run free-text injection: `{ text }` → `RunResult` |
 | GET · POST | `/api/switches` | Read or set `{ assume_breach, layer_off, audit_down }` |
-| POST | `/api/demo/reset` | Reload `data/seed.json` |
+| POST | `/api/demo/reset` | Reset and reseed backend state |
 | GET | `/api/evidence/[runId]` | The evidence report for one run, including the chain check |
 
 Types for every request and response are in `lib/types.ts` (`RunResult`, `AuditEvent`, `EvidenceReport`, `DemoState`, …).
@@ -248,23 +243,7 @@ Types for every request and response are in `lib/types.ts` (`RunResult`, `AuditE
 
 ## Data files
 
-| File | Holds |
-|---|---|
-| `data/seed.json` | Starting state: Maya's intent ($500 limit), three suppliers with masked accounts, seven components with fingerprints, both balances ($5,000), and the opening chat |
-| `data/scenarios/*.json` | One file per scenario. `raw` = the unprotected side (`steps`, `harm`, `balance_change_usd`); `protected` = Sudibran (`events`, `caught_at`, `rule`, `result`, optional `layer_off` endings) |
-| `data/attacks.json` | A1–A9 titles, layers and one-line descriptions |
-| `data/checks.json` | The checks the presenter can switch off, each tied to a node and optionally a rule |
-| `data/experiment.json` | The plain-language copy for each scenario on the dashboard: label, title, intro, how the model reacts, how Sudibran handles it |
-
-**Example event** (from a scenario's `protected.events`):
-
-```json
-{ "node": "policy", "edge": ["planner", "policy"], "layer": "workflow",
-  "mechanism": "formal_verification", "decision": "deny",
-  "reason": "R2: ****9917 is not on Acme's supplier record", "rule": "R2" }
-```
-
-Nodes are `maya, gate, seller, planner, parser, memory, policy, broker, crs, nessie, proxy, invoice_reader, supplier_db`. Layers follow Fig. 4: `user_interface, llm, workflow, memory, other_agents, tool, external_data, private_data, payment`.
+The frontend keeps only `data/experiment.json`, which is presentation copy for the dashboard (labels and explanatory text). It cannot create a run or determine an outcome. Runtime state, checks, preset inputs, scenarios and results all come from FastAPI.
 
 ---
 
@@ -279,7 +258,6 @@ sudibran-web/
     evidence/page.tsx         Audit trail list
     evidence/[runId]/page.tsx Evidence report
     demo/page.tsx             Redirects to /
-    api/…                     Mock route handlers (see API reference)
     layout.tsx                Fonts, nav, shared footer
     globals.css               Theme tokens and animations
   components/
@@ -295,13 +273,11 @@ sudibran-web/
     ui.tsx                    Buttons, chips, tags, banners, panels
   lib/
     api.ts                    The one client every page uses
-    store.ts                  In-memory state, scenario runner, hash chain (server only)
-    scenarios.ts              Scenario registry + free-text injection matcher
     chain.ts                  Canonical event serialisation, browser-side verification
     replay.ts                 Plays events back on a timer
     labels.ts                 Human labels for nodes, layers, decisions, rules
     types.ts                  Data contracts
-  data/                       Seed, scenarios and copy (see Data files)
+  data/experiment.json        Presentation copy only; never used for execution
   assets/                     Paper figures used on the dashboard
   docs/                       Research and design notes (local only, git-ignored)
 ```
@@ -332,12 +308,10 @@ sudibran-web/
 
 ## How to add a scenario
 
-1. Create `data/scenarios/<id>.json` following an existing file (for example `A3.json`). Fill `raw` (what the unprotected agent does) and `protected.events` (each check Sudibran runs, in order), plus `caught_at`, `rule` and `result`. Add a `layer_off` ending for the check that catches it, so switching that check off still shows the next layer.
-2. Register it in `lib/scenarios.ts` (import it and add it to the list).
-3. Add its plain-language copy to `data/experiment.json` (and to `data/attacks.json` if it's an `A*` attack).
-4. Add its layer to `LAYER_OF` in `app/page.tsx` so the map marks the targeted layer, and, if it should appear in the paper's risk list, a row in `RISKS`.
-5. If free text should reach it, add a keyword rule in `classifyInjection`.
-6. Run `npx tsc --noEmit && npm run lint`, then try it from the dashboard.
+1. Add the scenario under `sudinbran-backend/data/scenarios/`; the backend automatically exposes its id, kind, layer, title and input text through `GET /api/scenarios`.
+2. If it is an attack preset, add its description to the backend attack catalog. If free text should map to it in scripted mode, update the backend classifier.
+3. Optionally add plain-language dashboard copy to `data/experiment.json` and a row to `RISKS`; neither controls execution.
+4. Run the backend tests plus `npx tsc --noEmit && npm run lint`, then try it from the dashboard.
 
 ---
 
@@ -356,14 +330,14 @@ A suggested five-minute run, following the design storyboard:
 | 3:45 | **Controls → Audit log down**, run the $90 invoice from Payments: on hold |
 | 4:15 | **Audit trail**: open the report, filter by layer, press **Tamper with an event** |
 
-Checklist: the assume-breach switch is on (and said out loud), everything runs offline, no keys in the repo, and **Reset session** between judges.
+Checklist: the FastAPI health endpoint reports the expected live/simulated modes, the assume-breach switch is on (and said out loud), no keys are in the repo, and **Reset session** is used between judges.
 
 ---
 
 ## Known limits
 
-- **Simulated results.** Every outcome comes from the JSON files and is correct by assumption. Free-text injections are matched by keywords, not by a model.
-- **In-memory state.** A server restart or Reset clears payments, approvals and the audit chain. That's intended for the demo.
+- **Presets versus live runs.** Preset scenarios replay scripted checks for a deterministic presentation. Free-text injection and `/api/live/run` use the backend's live pipeline when `INJECT_MODE=live`.
+- **Sandbox integrations.** Nessie and CRS use sponsor sandboxes, not production financial accounts or real identities. `/api/health` identifies every live and simulated component.
 - **Single user.** There's no authentication; the whole app is Maya's sandbox.
 - **Example values.** Balances, amounts, the limit, accounts and fingerprints are illustrative. The R1 limit slider is kept between $150 and $600 so the scenarios stay consistent.
 - **Paper figures.** The dashboard shows Fig. 1, Fig. 2 and Fig. 4 from Kim et al. with a source caption. Before publishing the site (for example on Devpost), add a link to the paper or get permission, as the design notes recommend.
@@ -373,7 +347,7 @@ Checklist: the assume-breach switch is on (and said out loud), everything runs o
 ## Research and credits
 
 - The security model comes from **Kim et al., *The Attack and Defense Landscape of Agentic AI: A Comprehensive Survey*** (UC Berkeley, SNU, UIUC, UCSB): Fig. 1 (agent structure), Fig. 2 (attack vectors and risks) and Fig. 4 (defense landscape).
-- Sponsor integrations planned for the real backend: Claude (planner and parser), Factory Droid (the agent), Capital One Nessie (sandbox bank), CRS (identity and fraud), Hyphenate, Armadin and Microsoft tracks. See the research notes.
+- Sponsor integrations are implemented in the sibling backend: Claude (parser), Factory Droid (the agent), Capital One Nessie (sandbox bank), CRS (identity and fraud), plus the Hyphenate, Armadin and Microsoft system evidence.
 - **Research and design notes** live in `docs/` and are git-ignored, so they stay on this machine:
   - `docs/design_share/Sudibran_design/Sudibran_backend_design.md`: project direction, security model, rules R1–R8, the nine attacks, team plan
   - `docs/design_share/Sudibran_design/Sudibran_frontend_README.md`: the original frontend specification this prototype implements

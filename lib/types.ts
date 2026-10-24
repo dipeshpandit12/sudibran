@@ -1,4 +1,4 @@
-// Data contracts shared by the mock backend and the UI (README §5).
+// Data contracts shared by the FastAPI backend and the UI.
 
 export type Decision = "allow" | "flag" | "deny" | "ask" | "hold";
 
@@ -28,7 +28,7 @@ export type NodeId =
   | "invoice_reader"
   | "supplier_db";
 
-/** One step as written in a scenario file, before the mock stamps it. */
+/** One backend policy/audit step before run metadata is attached. */
 export interface ScenarioEvent {
   node: NodeId;
   edge: [NodeId, NodeId];
@@ -37,7 +37,7 @@ export interface ScenarioEvent {
   decision: Decision;
   reason: string;
   rule?: string;
-  /** Set by the mock when a check is switched off for the demo. */
+  /** Set by the backend when a check is switched off for the demo. */
   off?: boolean;
 }
 
@@ -134,33 +134,12 @@ export interface ProtectedResult {
   summary: string;
 }
 
-export interface LayerOffEnding {
-  events_tail: ScenarioEvent[];
-  caught_at: NodeId;
-  rule: string;
-  result?: Partial<ProtectedResult>;
-}
-
-export interface Scenario {
+export interface ScenarioInfo {
   id: string;
   kind: "attack" | "story";
   layer: Layer;
   title: string;
   injection: string | null;
-  invoice: Omit<Invoice, "run_id"> | null;
-  payment: { supplier: string; amount_usd: number; account_masked: string; crs: Payment["crs"] } | null;
-  raw: {
-    steps: string[];
-    harm: Harm;
-    balance_change_usd: number;
-  };
-  protected: {
-    events: ScenarioEvent[];
-    caught_at: NodeId | null;
-    rule: string | null;
-    result: ProtectedResult;
-    layer_off?: Record<string, LayerOffEnding>;
-  };
 }
 
 export interface AttackInfo {
@@ -184,13 +163,21 @@ export interface DemoSwitches {
   audit_down: boolean;
 }
 
+export interface BackendHealth {
+  status: string;
+  integrations?: {
+    payment_rail?: { mode: string };
+    crs?: { mode: string };
+  };
+}
+
 export interface RunResult {
   run_id: string;
   scenario_id: string;
-  kind: Scenario["kind"];
+  kind: "attack" | "story";
   title: string;
   injection: string | null;
-  invoice: Scenario["invoice"];
+  invoice: Omit<Invoice, "run_id"> | null;
   switches: DemoSwitches;
   raw: {
     steps: string[];
@@ -249,7 +236,7 @@ export interface EvidenceReport {
   chain: { intact: boolean; checked_events: number; broken_at: number | null };
 }
 
-/** One entry in data/experiment.json: the plain-language story of a scenario. */
+/** Presentation copy from data/experiment.json; it never controls execution. */
 export interface Chapter {
   id: string;
   kind: "baseline" | "threat";
