@@ -1,0 +1,6 @@
+{
+  "_comment": "Supplier bank records. Full account numbers never leave the backend; the API only ever shows ****last4. Example values: replace with your Nessie/CRS test data.",
+  "sup-acme": { "account_number": "4410000001234", "holder": "Acme Supplies LLC" },
+  "sup-northwind": { "account_number": "4410000005580", "holder": "Northwind Paper Co." },
+  "sup-bayline": { "account_number": "4410000003307", "holder": "Bayline Logistics Inc." }
+}

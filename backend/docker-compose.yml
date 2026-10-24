@@ -1,0 +1,127 @@
+# Sudibran, split into services. Every network boundary below is a privilege boundary:
+# review this file like production code.
+#
+#   docker compose up --build        then   curl localhost:8000/api/health
+#
+# Who holds what:
+#   gate      signing key, CRS key            talks to everything below, publishes :8000
+#   broker    Nessie key, signing key         only the gate can reach it (payments network)
+#   parser    Claude parser key               only the gate can reach it; no tools, no bank
+#   proxy     nothing                         the agent's only neighbour (MCP on :8002); forwards to the gate
+#   raw-agent Nessie key (raw-side account)   demo control group with no Sudibran
+#   opa, postgres                             no internet at all
+#
+# Droid runs on the host and is pointed at the proxy only:
+#   droid mcp add sudibran http://localhost:8002/mcp --type http --no-oauth
+# It holds no bank, CRS or model-parser key, and can't reach the broker's network.
+
+x-app: &app
+  build: .
+  restart: unless-stopped
+  volumes:
+    - ./data:/app/data:ro
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: sudibran
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-sudibran}
+      POSTGRES_DB: sudibran
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sudibran"]
+      interval: 2s
+      retries: 30
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks: [db]
+
+  opa:
+    image: openpolicyagent/opa:1.21.4
+    command: ["run", "--server", "--addr", "0.0.0.0:8181", "/policy"]
+    volumes:
+      - ./policy:/policy:ro
+    networks: [policy]
+
+  gate:
+    <<: *app
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    ports: ["8000:8000"]
+    environment:
+      DATABASE_URL: postgresql+asyncpg://sudibran:${POSTGRES_PASSWORD:-sudibran}@postgres:5432/sudibran
+      POLICY_ENGINE: opa
+      OPA_URL: http://opa:8181
+      BROKER_URL: http://broker:8001
+      PARSER_URL: http://parser:8003
+      RAW_AGENT_URL: http://raw-agent:8004
+      INTERNAL_TOKEN: ${INTERNAL_TOKEN:-change-me-internal}
+      BROKER_TOKEN: ${BROKER_TOKEN:-change-me-broker}
+      PARSER_TOKEN: ${PARSER_TOKEN:-change-me-parser}
+      SUDIBRAN_SIGNING_KEY: ${SUDIBRAN_SIGNING_KEY:-}
+      INJECT_MODE: ${INJECT_MODE:-live}
+      PLANNER: ${PLANNER:-scripted}
+      ANTHROPIC_API_KEY_PLANNER: ${ANTHROPIC_API_KEY_PLANNER:-}
+      PLANNER_MODEL: ${PLANNER_MODEL:-claude-opus-5-5}
+      CRS_BASE_URL: ${CRS_BASE_URL:-}
+      CRS_API_KEY: ${CRS_API_KEY:-}
+      CRS_USERNAME: ${CRS_USERNAME:-}
+      CRS_PASSWORD: ${CRS_PASSWORD:-}
+      SELLER_AGENT_SECRET: ${SELLER_AGENT_SECRET:-acme-seller-demo-secret}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
+    depends_on:
+      postgres: { condition: service_healthy }
+      opa: { condition: service_started }
+      broker: { condition: service_started }
+      parser: { condition: service_started }
+    networks: [public, db, policy, payments, parsing, proxy_gate, raw, egress]
+
+  broker:
+    <<: *app
+    command: ["uvicorn", "app.broker.service:app", "--host", "0.0.0.0", "--port", "8001"]
+    environment:
+      DATABASE_URL: postgresql+asyncpg://sudibran:${POSTGRES_PASSWORD:-sudibran}@postgres:5432/sudibran
+      BROKER_TOKEN: ${BROKER_TOKEN:-change-me-broker}
+      SUDIBRAN_SIGNING_KEY: ${SUDIBRAN_SIGNING_KEY:-}
+      NESSIE_API_KEY: ${NESSIE_API_KEY:-}
+    depends_on:
+      postgres: { condition: service_healthy }
+    networks: [db, payments, egress]
+
+  parser:
+    <<: *app
+    command: ["uvicorn", "app.agents.parser_service:app", "--host", "0.0.0.0", "--port", "8003"]
+    environment:
+      PARSER_TOKEN: ${PARSER_TOKEN:-change-me-parser}
+      ANTHROPIC_API_KEY_PARSER: ${ANTHROPIC_API_KEY_PARSER:-}
+      PARSER_MODEL: ${PARSER_MODEL:-claude-opus-5-5}
+    networks: [parsing, egress]
+
+  proxy:
+    <<: *app
+    command: ["uvicorn", "app.proxy.service:app", "--host", "0.0.0.0", "--port", "8002"]
+    ports: ["8002:8002"]
+    environment:
+      PROXY_FORWARD: "true"
+      GATE_URL: http://gate:8000
+      INTERNAL_TOKEN: ${INTERNAL_TOKEN:-change-me-internal}
+    networks: [public, proxy_gate]
+
+  raw-agent:
+    <<: *app
+    command: ["uvicorn", "app.agents.raw_agent:app", "--host", "0.0.0.0", "--port", "8004"]
+    environment:
+      NESSIE_API_KEY: ${NESSIE_API_KEY:-}
+    networks: [raw, egress]
+
+networks:
+  public: {}                    # host-published ports (gate, proxy)
+  egress: {}                    # internet: Nessie (broker, raw-agent), Claude (parser), CRS (gate)
+  db: { internal: true }        # gate, broker ↔ postgres
+  policy: { internal: true }    # gate ↔ opa
+  payments: { internal: true }  # gate ↔ broker. The proxy is NOT on this network.
+  parsing: { internal: true }   # gate ↔ parser
+  proxy_gate: { internal: true }  # proxy → gate
+  raw: { internal: true }       # gate ↔ raw-agent (demo control group)
+
+volumes:
+  pgdata: {}

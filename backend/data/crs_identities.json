@@ -1,0 +1,32 @@
+{
+  "_comment": "Who holds each bank account (by masked number), as a CRS sandbox TEST identity: `identity` is the TruValidate request body, `email` feeds Fraud Finder. Built from the sandbox spec's example identity (SSN prefix 666 is never issued, so no real person). Live verdicts observed 2026-10-24: Alexia Portege → LOW/clean; invalid SSN → HIGH/flagged; wrong name on the SSN → MEDIUM/not found. `simulated_result` is used only when CRS isn't configured.",
+  "****1234": {
+    "subject": "Acme Supplies LLC (owner Alexia Portege, CRS test identity)",
+    "identity": {"firstName": "Alexia", "lastName": "portege", "street1": "333 DOGWOOD", "city": "Rincon", "state": "GA", "zip": "31326", "ssn": "666224616"},
+    "email": "billing@acme-supplies.example",
+    "simulated_result": "clean", "signals": []
+  },
+  "****5580": {
+    "subject": "Northwind Paper Co. (owner Alexia Portege, CRS test identity)",
+    "identity": {"firstName": "Alexia", "lastName": "portege", "street1": "333 DOGWOOD", "city": "Rincon", "state": "GA", "zip": "31326", "ssn": "666224616"},
+    "email": "ap@northwind-paper.example",
+    "simulated_result": "clean", "signals": []
+  },
+  "****3307": {
+    "subject": "Bayline Logistics Inc. (owner Alexia Portege, CRS test identity)",
+    "identity": {"firstName": "Alexia", "lastName": "portege", "street1": "333 DOGWOOD", "city": "Rincon", "state": "GA", "zip": "31326", "ssn": "666224616"},
+    "email": "accounts@bayline.example",
+    "simulated_result": "clean", "signals": []
+  },
+  "****9917": {
+    "subject": "Holder of ****9917 (\"Mallory Swapper\", invalid-SSN test identity)",
+    "identity": {"firstName": "Mallory", "lastName": "Swapper", "street1": "1 FAKE ST", "city": "New York", "state": "NY", "zip": "10001", "ssn": "666009917"},
+    "email": "acme-billing-update@mailinator.com",
+    "simulated_result": "flagged", "signals": ["synthetic identity", "account opened recently"]
+  },
+  "****4242": {
+    "subject": "Holder of ****4242 (name doesn't match the SSN on file)",
+    "identity": {"firstName": "Mallory", "lastName": "Swapper", "street1": "333 DOGWOOD", "city": "Rincon", "state": "GA", "zip": "31326", "ssn": "666224616"},
+    "simulated_result": "mismatch", "signals": ["identity mismatch"]
+  }
+}
