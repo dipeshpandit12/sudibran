@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$FACTORY_PROJECT_DIR/hooks/pre_tool_use.py\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
