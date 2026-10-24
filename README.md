@@ -9,7 +9,38 @@ Sudibran is a security and audit layer for AI-initiated financial actions. This 
 
 ## Run locally
 
-Requirements: Node.js 20.9+, npm, Python 3.12+ and `uv`.
+Docker requirement: Docker Desktop with Docker Compose.
+
+### One command with Docker
+
+Start the frontend and all seven backend services together:
+
+```bash
+./run-all.sh
+```
+
+The command builds and starts Next.js, FastAPI, Postgres, OPA, the MCP proxy, broker, parser and raw agent, waits for the frontend and backend health endpoints, and prints their URLs. It reads sponsor credentials from `backend/.env` when that file exists.
+
+If either local environment file is missing, the launcher prints the exact setup command and continues with safe defaults:
+
+```bash
+cp frontend/.env.example frontend/.env
+cp backend/.env.example backend/.env
+```
+
+Review the new files and add your local settings. Both `.env` files are ignored by Git and must not be committed.
+
+```bash
+./run-all.sh status   # container health
+./run-all.sh logs     # follow every service
+./run-all.sh down     # stop; keep database volume
+```
+
+The all-Docker stack uses the scripted planner because the subscription-authenticated Factory Droid binary runs on the host and cannot execute inside the Linux image. Use the manual localhost commands below when testing live Droid planning.
+
+### Manual localhost development
+
+Manual development requires Node.js 20.9+, npm, Python 3.12+ and `uv`.
 
 ```bash
 # Terminal 1 — FastAPI
