@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 
 /*
   A looping recording of Maya's chat with her payments agent: she types one
@@ -44,7 +45,13 @@ export function AgentChatAnimation() {
     <figure className="overflow-hidden rounded-2xl border border-rule bg-surface shadow-[0_24px_60px_-30px_rgba(21,35,63,0.45)]">
       {/* App header */}
       <div className="flex items-center gap-3 border-b border-rule px-5 py-3">
-        <span className="grid size-9 place-items-center rounded-full bg-ink text-[13px] font-bold text-white">AP</span>
+        <Image
+          src="/favicon-32x32.png"
+          alt="Sudibran"
+          width={32}
+          height={32}
+          className="size-9 rounded-full"
+        />
         <div className="leading-tight">
           <p className="text-[15px] font-bold">Payments assistant</p>
           <p className="text-[12.5px] text-ink-2">{working ? "Working…" : "Online"}</p>
@@ -62,7 +69,13 @@ export function AgentChatAnimation() {
 
         {sent && (
           <div className="step-in flex max-w-[88%] gap-2.5 self-start">
-            <span className="mt-1 grid size-7 shrink-0 place-items-center rounded-full bg-safe text-[11px] font-bold text-white">AI</span>
+            <Image
+              src="/favicon-32x32.png"
+              alt="Sudibran assistant"
+              width={32}
+              height={32}
+              className="mt-1 size-7 shrink-0 rounded-full"
+            />
             <div className="min-w-0 flex-1 rounded-2xl rounded-tl-md border border-rule bg-surface px-4 py-3">
               <p className="text-[14.5px]">On it. Here&apos;s what I&apos;m doing:</p>
               <ul className="mt-2.5 space-y-1.5">
@@ -99,7 +112,13 @@ export function AgentChatAnimation() {
 
         {done && (
           <div className="step-in flex max-w-[88%] gap-2.5 self-start">
-            <span className="mt-1 grid size-7 shrink-0 place-items-center rounded-full bg-safe text-[11px] font-bold text-white">AI</span>
+            <Image
+              src="/favicon-32x32.png"
+              alt="Sudibran assistant"
+              width={32}
+              height={32}
+              className="mt-1 size-7 shrink-0 rounded-full"
+            />
             <div className="rounded-2xl rounded-tl-md border border-safe-line bg-surface px-4 py-3">
               <p className="text-[14.5px]">Done. Acme&apos;s invoice is paid.</p>
               <div className="mt-2.5 flex items-center gap-6 rounded-lg bg-safe-wash px-3.5 py-2.5">

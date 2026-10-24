@@ -9,6 +9,15 @@ const jbmono = JetBrains_Mono({ variable: "--font-jbmono", subsets: ["latin"], w
 export const metadata: Metadata = {
   title: "Sudibran",
   description: "The black box for AI financial actions.",
+  manifest: "/site.webmanifest",
+  icons: {
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

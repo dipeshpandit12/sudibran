@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -12,12 +13,7 @@ const LINKS = [
 export function Wordmark() {
   return (
     <span className="flex items-center gap-2.5">
-      {/* A flight recorder, seen from the front: the box and its data slot. */}
-      <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden>
-        <rect x="1" y="1" width="20" height="20" rx="4" fill="var(--color-ink)" />
-        <rect x="5" y="9.5" width="12" height="3" rx="1.5" fill="var(--color-paper)" />
-        <circle cx="16.5" cy="5.5" r="1.6" fill="var(--color-flag)" />
-      </svg>
+      <Image src="/favicon-32x32.png" alt="" width={22} height={22} className="rounded-[5px]" />
       <span className="display text-[19px]">Sudibran</span>
     </span>
   );
