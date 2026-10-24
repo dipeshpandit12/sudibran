@@ -1,46 +1,26 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
-/node_modules
-/.pnp
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
-
-# testing
-/coverage
-
-# next.js
-/.next/
-/out/
-
-# production
-/build
-
-# misc
+# Workspace-local files
 .DS_Store
-*.pem
-
-# debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
-
-# env files (can opt-in for committing if needed)
-.env*
-!.env.example
-
-# vercel
-.vercel
-
-# typescript
-*.tsbuildinfo
-next-env.d.ts
 .gstack/
 
-# research and design notes (local only)
-/docs/
+# Secrets and local environment overrides
+**/.env
+**/.env.*
+!**/.env.example
+**/.keys/
+
+# Dependencies and generated output
+**/.venv/
+**/node_modules/
+**/.next/
+**/out/
+**/build/
+**/__pycache__/
+**/.pytest_cache/
+**/.ruff_cache/
+**/*.tsbuildinfo
+
+# Local databases and integration state
+**/*.db
+**/*.db-wal
+**/*.db-shm
+backend/data/nessie.json
