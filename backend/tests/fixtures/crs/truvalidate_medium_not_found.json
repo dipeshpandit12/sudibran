@@ -1,0 +1,230 @@
+{
+ "fileNumber": "01",
+ "fileSummary": {
+  "fileHitIndicator": "SUBJECT_HIT",
+  "creditDataStatus": {
+   "suppressed": false,
+   "doNotPromote": {
+    "indicator": false
+   },
+   "freeze": {
+    "indicator": false
+   },
+   "minor": false,
+   "disputed": false
+  }
+ },
+ "indicative": {
+  "names": [
+   {
+    "person": {
+     "first": "Mallory",
+     "last": "Swapper"
+    },
+    "source": "INPUT"
+   },
+   {
+    "qualifier": "BUSINESS_GOVT",
+    "person": {
+     "first": "ALEXIA",
+     "last": "PORTEGE"
+    },
+    "source": "NON_CREDIT_FILE"
+   }
+  ],
+  "addresses": [
+   {
+    "status": "CURRENT",
+    "street": {
+     "unparseds": [],
+     "number": "333",
+     "name": "DOGWOOD"
+    },
+    "location": {
+     "city": "Rincon",
+     "state": "GA",
+     "zipCode": "31326"
+    },
+    "source": "INPUT"
+   },
+   {
+    "status": "CURRENT",
+    "qualifier": "BUSINESS",
+    "classification": {
+     "type": "CONVENTIONAL"
+    },
+    "street": {
+     "unparseds": [],
+     "number": "300",
+     "name": "DOGWOOD"
+    },
+    "location": {
+     "city": "RINCON",
+     "state": "GA",
+     "zipCode": "31326-1252"
+    },
+    "dateReported": {
+     "value": "2003-03-15T00:00:00.000+00:00"
+    },
+    "source": "NON_CREDIT_FILE"
+   }
+  ],
+  "socialSecurities": [
+   {
+    "number": "666224616",
+    "identificationIssuance": {
+     "type": "SSN",
+     "status": "CLEAR",
+     "yearRange": {
+      "startYear": "2004",
+      "endYear": "2004"
+     },
+     "state": "ID",
+     "ageObtained": {
+      "rangeStart": "+00",
+      "rangeEnd": "+00"
+     }
+    },
+    "source": "INPUT",
+    "masked": false
+   }
+  ],
+  "dateOfBirths": [],
+  "ages": [],
+  "phones": [
+   {
+    "number": {
+     "qualifier": "PERSONAL"
+    },
+    "source": "INPUT"
+   },
+   {
+    "number": {
+     "qualifier": "PERSONAL",
+     "listed": "LISTED",
+     "dialable": "DIALABLE",
+     "type": "STANDARD",
+     "areaCode": "912",
+     "exchange": "678",
+     "suffix": "3345"
+    },
+    "source": "NON_CREDIT_FILE"
+   }
+  ],
+  "employments": [],
+  "creditCards": [],
+  "genders": [],
+  "vehicles": []
+ },
+ "originalInputs": [],
+ "custom": {
+  "idmanagerVerAnalysisV2": {
+   "verificationSummary": {
+    "riskIndicator": "MEDIUM",
+    "bestMatch": "NON_CREDIT_FILE",
+    "verificationPoint": 30,
+    "lowerThreshold": 5,
+    "upperThreshold": 49,
+    "keyMessages": {
+     "keyMessages": [
+      {
+       "code": "KMSG07",
+       "text": "ADDRESS RELATED ALERT"
+      }
+     ]
+    }
+   },
+   "fraudAnalysis": {
+    "location": {
+     "counties": [
+      {
+       "name": "EFFINGHAM",
+       "population": "OVER_150",
+       "city": "RINCON",
+       "state": "GA",
+       "source": "INPUT",
+       "inputElement": "ZIP_CODE"
+      }
+     ],
+     "zips": [
+      {
+       "code": "31326",
+       "indicator": "INPUT",
+       "type": "REGULAR",
+       "source": "INPUT",
+       "inputElement": "ADDRESS"
+      }
+     ]
+    },
+    "region": {
+     "zipVsCity": "VALID",
+     "zipVsState": "VALID",
+     "phoneVsState": "NOT_AVAILABLE",
+     "phoneVsZIP": "NOT_AVAILABLE",
+     "phoneVsZIPDistance": "0000.000",
+     "source": "INPUT"
+    },
+    "employment": {},
+    "distance": {
+     "minimum": {
+      "noAnalysisReason": "NOT_AVAILABLE"
+     },
+     "maximum": {
+      "noAnalysisReason": "NOT_AVAILABLE"
+     },
+     "source": "INPUT"
+    }
+   },
+   "verificationAnalysises": [
+    {
+     "verificationStatus": "SUBJECT_NOT_FOUND",
+     "firstNameVerification": "NOT_FOUND",
+     "middleNameVerification": "MATCH_NOT_PERFORMED",
+     "lastNameVerification": "NOT_FOUND",
+     "nameSuffixVerification": "MATCH_NOT_PERFORMED",
+     "currentAddressVerification": "NOT_FOUND",
+     "previousAddressVerification": "MATCH_NOT_PERFORMED",
+     "phoneNumberVerification": "INPUT_NOT_AVAILABLE",
+     "ssnVerification": "NOT_FOUND",
+     "dateOfBirthVerification": "MATCH_NOT_PERFORMED",
+     "source": "FILE"
+    },
+    {
+     "verificationStatus": "SUBJECT_FOUND",
+     "firstNameVerification": "NOT_FOUND",
+     "middleNameVerification": "MATCH_NOT_PERFORMED",
+     "lastNameVerification": "NOT_FOUND",
+     "nameSuffixVerification": "MATCH_NOT_PERFORMED",
+     "currentAddressVerification": "PARTIAL_MATCH",
+     "previousAddressVerification": "INPUT_NOT_AVAILABLE",
+     "phoneNumberVerification": "INPUT_NOT_AVAILABLE",
+     "ssnVerification": "MATCH_NOT_PERFORMED",
+     "dateOfBirthVerification": "MATCH_NOT_PERFORMED",
+     "source": "NON_CREDIT_FILE"
+    }
+   ]
+  }
+ },
+ "addOnProducts": [
+  {
+   "code": "FRDMS",
+   "status": "DELIVERED",
+   "idMismatchAlerts": [],
+   "addressAnalysises": [],
+   "idManagerVerification": {
+    "messages": [
+     {
+      "code": "2101",
+      "text": "INPUT CURRENT ADDRESS DOES NOT MATCH FILE CURRENT ADDRESS",
+      "source": "INPUT"
+     }
+    ],
+    "deceases": [],
+    "identificationIssuances": [],
+    "returnMessage": "CODES_AND_TEXT",
+    "searchStatus": "HIT"
+   },
+   "creditorContacts": []
+  }
+ ]
+}

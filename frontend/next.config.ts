@@ -3,6 +3,7 @@ import type { NextConfig } from "next";
 const backendUrl = (process.env.SUDIBRAN_BACKEND_URL || "http://127.0.0.1:8000").replace(/\/+$/, "");
 
 const nextConfig: NextConfig = {
+  output: "standalone",
   reactCompiler: true,
   devIndicators: false,
   async rewrites() {
