@@ -1,9 +1,23 @@
 import type { NextConfig } from "next";
 
-// The mock backend keeps demo state in memory, so every route must run at request time.
+const backendUrl = (process.env.SUDIBRAN_BACKEND_URL || "http://127.0.0.1:8000").replace(/\/+$/, "");
+
 const nextConfig: NextConfig = {
   reactCompiler: true,
   devIndicators: false,
+  async rewrites() {
+    return {
+      // Keep the browser same-origin while FastAPI owns the complete API contract.
+      beforeFiles: [
+        {
+          source: "/api/:path*",
+          destination: `${backendUrl}/api/:path*`,
+        },
+      ],
+      afterFiles: [],
+      fallback: [],
+    };
+  },
   turbopack: {
     rules: {
       "*.css": {

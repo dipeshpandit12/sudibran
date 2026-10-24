@@ -5,9 +5,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import chaptersJson from "@/data/experiment.json";
 import { api } from "@/lib/api";
 import { useReplay } from "@/lib/replay";
-import { SCENARIOS } from "@/lib/scenarios";
 import { LAYER_LABEL, NODE_LABEL, RULE_LABEL, usd } from "@/lib/labels";
-import type { AuditEvent, Chapter, Check, Decision, DemoState, Layer, NodeId, RunResult } from "@/lib/types";
+import type { AuditEvent, Chapter, Check, Decision, DemoState, Layer, NodeId, RunResult, ScenarioInfo } from "@/lib/types";
 import Image, { type StaticImageData } from "next/image";
 import fig1 from "@/assets/fig1-agent.png";
 import fig2 from "@/assets/fig2-risks.png";
@@ -25,20 +24,7 @@ const CHAPTERS = chaptersJson as Chapter[];
 const THREATS = CHAPTERS.filter((c) => c.kind === "threat");
 const BY_ID = Object.fromEntries(CHAPTERS.map((c) => [c.id, c]));
 const STEP_MS = 900;
-
-const LAYER_OF: Record<string, Layer> = {
-  side_by_side_140: "workflow",
-  A1: "user_interface",
-  A2: "llm",
-  A3: "workflow",
-  A4: "memory",
-  A5: "other_agents",
-  A6: "tool",
-  A7: "external_data",
-  A8: "private_data",
-  A9: "payment",
-  custom: "workflow",
-};
+const DEFAULT_PRESET = "side_by_side_140";
 
 const TARGET: Record<Layer, NodeId> = {
   user_interface: "gate",
@@ -152,21 +138,25 @@ const VERDICT_STYLE: Record<Decision, { box: string; head: string; badge: string
 export default function Dashboard() {
   const [state, setState] = useState<DemoState | null>(null);
   const [checks, setChecks] = useState<Check[]>([]);
-  const [preset, setPreset] = useState<string | null>("side_by_side_140");
-  const [text, setText] = useState<string>(SCENARIOS.side_by_side_140.injection ?? "");
+  const [scenarios, setScenarios] = useState<ScenarioInfo[]>([]);
+  const [preset, setPreset] = useState<string | null>(DEFAULT_PRESET);
+  const [text, setText] = useState("");
   const [run, setRun] = useState<RunResult | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pinned, setPinned] = useState<{ key: string; i: number } | null>(null);
   const testRef = useRef<HTMLElement>(null);
   const resultRef = useRef<HTMLDivElement>(null);
+  const scenarioById = useMemo(() => new Map(scenarios.map((scenario) => [scenario.id, scenario])), [scenarios]);
 
   const refresh = useCallback(async () => setState(await api.state()), []);
   useEffect(() => {
-    Promise.all([api.state(), api.checks()])
-      .then(([s, c]) => {
+    Promise.all([api.state(), api.checks(), api.scenarios()])
+      .then(([s, c, availableScenarios]) => {
         setState(s);
         setChecks(c);
+        setScenarios(availableScenarios);
+        setText(availableScenarios.find((scenario) => scenario.id === DEFAULT_PRESET)?.injection ?? "");
       })
       .catch((e: Error) => setError(e.message));
   }, []);
@@ -179,7 +169,7 @@ export default function Dashboard() {
 
   function choose(id: string, scroll = false) {
     setPreset(id);
-    setText(SCENARIOS[id]?.injection ?? "");
+    setText(scenarioById.get(id)?.injection ?? "");
     if (scroll) testRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
@@ -188,8 +178,13 @@ export default function Dashboard() {
     setError(null);
     setPinned(null);
     try {
-      const exact = preset && preset !== "custom" && text.trim() === (SCENARIOS[preset]?.injection ?? "").trim();
-      const r = exact ? (preset!.startsWith("A") ? await api.runAttack(preset!) : await api.runStory(preset!)) : await api.inject(text);
+      const selected = preset ? scenarioById.get(preset) : undefined;
+      const exact = Boolean(selected && preset !== "custom" && text.trim() === (selected.injection ?? "").trim());
+      const r = exact && selected
+        ? /^A[1-9]$/.test(selected.id)
+          ? await api.runAttack(selected.id)
+          : await api.runStory(selected.id)
+        : await api.inject(text);
       setRun(r);
       requestAnimationFrame(() => resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
     } catch (e) {
@@ -243,7 +238,8 @@ export default function Dashboard() {
   const focus = pin ?? (play.done ? decisiveIndex(play.events) : Math.max(0, play.shown - 1));
   const setFocus = (i: number) => play.key && setPinned({ key: play.key, i });
   const rawShown = run ? (play.done ? run.raw.steps.length : Math.ceil((play.shown / Math.max(1, play.events.length)) * run.raw.steps.length)) : 0;
-  const isCustom = !preset || preset === "custom" || text.trim() !== (SCENARIOS[preset]?.injection ?? "").trim();
+  const selectedScenario = preset ? scenarioById.get(preset) : undefined;
+  const isCustom = !selectedScenario || preset === "custom" || text.trim() !== (selectedScenario.injection ?? "").trim();
 
   return (
     <div className="flex-1">
@@ -425,8 +421,8 @@ export default function Dashboard() {
           <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
             <p className="text-[13px] text-ink-2">
               {isCustom
-                ? "Your text is matched to the closest known attack. If it matches none, Sudibran treats it as an action no policy allows."
-                : `Targets the ${LAYER_LABEL[LAYER_OF[preset!]]} layer.`}
+                ? "Your text is processed by the backend's live parser, planner and policy pipeline."
+                : `Targets the ${LAYER_LABEL[selectedScenario?.layer ?? "workflow"]} layer.`}
             </p>
             <Button variant="primary" onClick={send} disabled={busy || !text.trim()} className="px-5">
               Send to both agents
@@ -511,7 +507,7 @@ export default function Dashboard() {
                     <Fig4Map
                       events={play.events.slice(0, play.shown)}
                       focus={focus}
-                      target={TARGET[LAYER_OF[run.scenario_id] ?? "workflow"]}
+                      target={TARGET[scenarioById.get(run.scenario_id)?.layer ?? "workflow"]}
                       end={end}
                       quarantined={quarantined}
                       onZone={(n) => {

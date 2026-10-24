@@ -1,8 +1,9 @@
-// The one client every page uses. Point these paths at the real gate later without touching pages.
+// Every request is same-origin in the browser and proxied to FastAPI by next.config.ts.
 import type {
   Approval,
   AttackInfo,
   AuditEvent,
+  BackendHealth,
   ChatMessage,
   Check,
   Component,
@@ -12,6 +13,7 @@ import type {
   Intent,
   Payment,
   RunResult,
+  ScenarioInfo,
 } from "./types";
 
 async function call<T>(path: string, init?: { method?: string; body?: unknown }): Promise<T> {
@@ -27,9 +29,11 @@ async function call<T>(path: string, init?: { method?: string; body?: unknown })
 }
 
 export const api = {
+  health: () => call<BackendHealth>("/api/health"),
   state: () => call<DemoState>("/api/state"),
   components: () => call<Component[]>("/api/components"),
   attacks: () => call<AttackInfo[]>("/api/attacks"),
+  scenarios: () => call<ScenarioInfo[]>("/api/scenarios"),
   checks: () => call<Check[]>("/api/checks"),
   runAttack: (id: string) => call<RunResult>(`/api/attacks/${id}`, { method: "POST" }),
   runStory: (id: string) => call<RunResult>(`/api/story/${id}`, { method: "POST" }),
