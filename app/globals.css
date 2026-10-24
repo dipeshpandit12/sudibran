@@ -1,26 +1,136 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/*
+  Sudibran palette: cool ledger paper and navy ink. Red and teal are kept for the
+  two sides of the comparison; amber, gold and grey only ever mean a decision.
+*/
+@theme {
+  --color-paper: #edf0ed;
+  --color-surface: #ffffff;
+  --color-sunk: #e3e8e5;
+  --color-ink: #15233f;
+  --color-ink-2: #46526c;
+  --color-ink-3: #77819a;
+  --color-rule: #cbd3d0;
+
+  --color-harm: #b42318;
+  --color-harm-wash: #fbecea;
+  --color-harm-line: #e8b4ae;
+  --color-safe: #0f6a5a;
+  --color-safe-wash: #e6f1ee;
+  --color-safe-line: #a9cfc5;
+
+  --color-flag: #b86e00;
+  --color-flag-wash: #fdf1dc;
+  --color-ask: #8d6f00;
+  --color-ask-wash: #f9f0c8;
+  --color-ask-line: #d9bf55;
+  --color-hold: #626a78;
+  --color-hold-wash: #e9ebef;
+  --color-hold-line: #c4c9d2;
+  --color-blue: #3b62a8;
+  --color-blue-wash: #e6eefb;
+
+  --font-sans: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jbmono), ui-monospace, monospace;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html,
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  font-feature-settings: "tnum" 1;
 }
+
+.display {
+  font-stretch: 100%;
+  font-weight: 700;
+  letter-spacing: -0.022em;
+  line-height: 1.08;
+}
+
+/* Kept for numerals and step markers; normal width, just a touch bolder. */
+.wide {
+  font-weight: 700;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Left pane: the faint diagonal hatch of a voided cheque. */
+.hatch-harm {
+  background-color: var(--color-harm-wash);
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent 0 14px,
+    color-mix(in srgb, var(--color-harm) 5%, transparent) 14px 15px
+  );
+}
+
+/* Right pane: instrument graph paper. */
+.grid-safe {
+  background-color: var(--color-safe-wash);
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--color-safe) 7%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--color-safe) 7%, transparent) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+@keyframes step-in {
+  from { opacity: 0; transform: translateX(-6px); }
+  to { opacity: 1; transform: none; }
+}
+.step-in { animation: step-in 260ms ease-out both; }
+
+@keyframes stamp {
+  0% { opacity: 0; transform: scale(1.25) rotate(-4deg); }
+  60% { opacity: 1; transform: scale(0.97) rotate(-4deg); }
+  100% { opacity: 1; transform: scale(1) rotate(-4deg); }
+}
+.stamp { animation: stamp 380ms cubic-bezier(.2,.8,.2,1) both; }
+
+/* The step being checked right now. */
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--ring) 45%, transparent); }
+  100% { box-shadow: 0 0 0 14px color-mix(in srgb, var(--ring) 0%, transparent); }
+}
+.pulse-ring { animation: pulse-ring 1.1s ease-out infinite; }
+
+/* Data travelling along the connector into the current step. */
+@keyframes flow-dash {
+  from { background-position: 0 0; }
+  to { background-position: 24px 0; }
+}
+.flow-dash {
+  background-image: repeating-linear-gradient(90deg, var(--c) 0 12px, color-mix(in srgb, var(--c) 25%, white) 12px 24px);
+  animation: flow-dash 0.6s linear infinite;
+}
+
+/* Fig. 4 map: the newest hop draws itself, the focused layer breathes. */
+@keyframes trace-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+.trace-draw { stroke-dasharray: 1; animation: trace-draw 650ms ease-out both; }
+@keyframes zone-focus {
+  0%, 100% { filter: drop-shadow(0 0 0 transparent); }
+  50% { filter: drop-shadow(0 0 7px color-mix(in srgb, var(--zc) 55%, transparent)); }
+}
+.zone-focus { animation: zone-focus 1.4s ease-in-out infinite; }
+@keyframes target-ring { to { stroke-dashoffset: -22; } }
+.target-ring { animation: target-ring 1s linear infinite; }
+@keyframes stamp-in { from { opacity: 0; } to { opacity: 1; } }
+.stamp-in { animation: stamp-in 300ms ease-out both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .step-in, .stamp, .pulse-ring, .flow-dash, .trace-draw, .zone-focus, .target-ring, .stamp-in { animation: none; }
+}
+
+/* React Flow: quiet chrome, our own nodes. */
+.react-flow__attribution { display: none; }
+.react-flow__node { cursor: pointer; }
+.react-flow__handle { opacity: 0; pointer-events: none; }

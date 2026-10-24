@@ -1,0 +1,10 @@
+[
+  { "key": "gate_input", "label": "Untrusted-paste tagging", "node": "gate" },
+  { "key": "gate_r3", "label": "Agent report check (R3)", "node": "seller", "rule": "R3" },
+  { "key": "parser_sep", "label": "Parser privilege split", "node": "parser" },
+  { "key": "memory_flag", "label": "Memory source tags", "node": "memory" },
+  { "key": "policy_r2", "label": "Payee from records (R2)", "node": "policy", "rule": "R2" },
+  { "key": "policy_pd", "label": "Private data egress", "node": "policy", "rule": "PD" },
+  { "key": "proxy_fp", "label": "Tool fingerprint", "node": "proxy", "rule": "FP" },
+  { "key": "crs_r7", "label": "CRS fraud check (R7)", "node": "crs", "rule": "R7" }
+]
