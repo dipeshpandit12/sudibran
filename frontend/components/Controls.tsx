@@ -39,7 +39,7 @@ export function Controls({
       {open && (
         <>
           <button aria-label="Close controls" className="fixed inset-0 z-40 cursor-default" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 top-full z-50 mt-2 w-[340px] rounded-xl border border-rule bg-surface p-2 shadow-[0_12px_40px_-12px_rgba(21,35,63,0.35)]">
+          <div className="absolute right-0 top-full z-50 mt-2 w-[340px] rounded-lg border border-gray-300 bg-white p-2">
             <Switch
               label="Assume breach"
               hint="Force the model to follow every attack, as if fully fooled."

@@ -42,7 +42,7 @@ export function AgentChatAnimation() {
   const done = t >= DONE_AT;
 
   return (
-    <figure className="overflow-hidden rounded-2xl border border-rule bg-surface shadow-[0_24px_60px_-30px_rgba(21,35,63,0.45)]">
+    <figure className="overflow-hidden rounded-xl border border-rule bg-surface">
       {/* App header */}
       <div className="flex items-center gap-3 border-b border-rule px-5 py-3">
         <Image

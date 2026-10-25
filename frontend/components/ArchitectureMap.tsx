@@ -71,11 +71,10 @@ function Box({
   }[tone];
   return (
     <div
-      className={`rounded-xl border-2 px-3 py-2.5 text-center transition-all duration-300 ${base} ${dashed ? "border-dashed" : ""} ${className}`}
+      className={`rounded-lg border px-3 py-2.5 text-center transition-colors ${base} ${dashed ? "border-dashed" : ""} ${className}`}
       style={{
-        borderColor: on ? "var(--color-ink)" : "var(--color-rule)",
-        boxShadow: on ? "0 0 0 4px color-mix(in srgb, var(--color-ink) 14%, transparent)" : "none",
-        transform: on ? "translateY(-2px)" : "none",
+        borderColor: on ? "#000000" : "var(--color-rule)",
+        borderWidth: on ? "2px" : "1px",
       }}
     >
       <p className="text-[15px] font-bold leading-tight">{title}</p>

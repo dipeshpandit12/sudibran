@@ -9,6 +9,7 @@ import { LAYER_LABEL, LAYER_ORDER, NODE_LABEL, RULE_LABEL } from "@/lib/labels";
 import type { AuditEvent, EvidenceReport, Layer } from "@/lib/types";
 import { Button, DecisionChip, PaymentChip, Panel, Tag } from "@/components/ui";
 import { PAGE, PageHeader } from "@/components/PageHeader";
+import { ClientGuard } from "@/components/ClientGuard";
 
 function ChainCheck({ report }: { report: EvidenceReport }) {
   const [events, setEvents] = useState<AuditEvent[]>(report.decisions);
@@ -74,7 +75,7 @@ function ChainCheck({ report }: { report: EvidenceReport }) {
   );
 }
 
-export default function EvidencePage() {
+function EvidencePageContent() {
   const { runId } = useParams<{ runId: string }>();
   const [report, setReport] = useState<EvidenceReport | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -128,7 +129,7 @@ export default function EvidencePage() {
         title={report.title}
         actions={
           <>
-            <Link href="/" className="rounded-lg border border-rule bg-surface px-3.5 py-2 text-[14px] font-semibold hover:bg-sunk">
+            <Link href="/dashboard" className="rounded-lg border border-rule bg-surface px-3.5 py-2 text-[14px] font-semibold hover:bg-sunk">
               Back to dashboard
             </Link>
             <Button variant="primary" onClick={download}>
@@ -286,3 +287,12 @@ export default function EvidencePage() {
     </main>
   );
 }
+
+export default function EvidencePage() {
+  return (
+    <ClientGuard pageTitle="Audit Evidence Detail">
+      <EvidencePageContent />
+    </ClientGuard>
+  );
+}
+

@@ -6,6 +6,7 @@ import { usd } from "@/lib/labels";
 import type { Component, DemoState } from "@/lib/types";
 import { PAGE, PageHeader, SectionTitle } from "@/components/PageHeader";
 import { Button, Panel, Tag } from "@/components/ui";
+import { ClientGuard } from "@/components/ClientGuard";
 
 const TYPE_LABEL: Record<Component["type"], string> = {
   model: "Model",
@@ -29,25 +30,25 @@ const RULES: { id: string; name: string; does: string; layer: string }[] = [
 function ComponentCard({ c }: { c: Component }) {
   const bad = c.status === "quarantined";
   return (
-    <li className={`flex flex-col rounded-xl border-2 bg-surface p-4 ${bad ? "border-dashed border-harm" : "border-rule"}`}>
+    <li className={`flex flex-col rounded-xl border bg-white p-4 ${bad ? "border-dashed border-neutral-400" : "border-neutral-200"}`}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-[12.5px] font-medium text-ink-3">{TYPE_LABEL[c.type]}</p>
-          <h3 className="text-[16px] font-bold leading-tight">{c.name}</h3>
+          <p className="text-xs font-mono uppercase tracking-wider text-neutral-500">{TYPE_LABEL[c.type]}</p>
+          <h3 className="text-base font-bold text-black leading-tight">{c.name}</h3>
         </div>
         <Tag tone={bad ? "harm" : "safe"}>{bad ? "✕ Quarantined" : "✓ Verified"}</Tag>
       </div>
-      <p className="mt-2 text-[13.5px] leading-snug text-ink-2">{c.description}</p>
-      <p className="mt-auto flex items-center justify-between gap-2 border-t border-rule pt-3 text-[12.5px] text-ink-3">
+      <p className="mt-2 text-xs leading-relaxed text-neutral-600">{c.description}</p>
+      <p className="mt-auto flex items-center justify-between gap-2 border-t border-neutral-200 pt-2.5 text-xs text-neutral-500 font-mono">
         Fingerprint
-        <span className={`rounded bg-paper px-1.5 py-0.5 font-mono text-[13px] ${bad ? "text-harm" : "text-ink"}`}>{c.fingerprint}</span>
+        <span className="rounded bg-neutral-100 px-2 py-0.5 font-mono text-xs border border-neutral-200 text-black">{c.fingerprint}</span>
       </p>
-      {bad && <p className="mt-2 text-[13px] font-medium text-harm">Changed since it was registered. Blocked until you re-approve it.</p>}
+      {bad && <p className="mt-2 text-xs font-mono text-neutral-600">Changed since it was registered. Blocked until you re-approve it.</p>}
     </li>
   );
 }
 
-export default function Policies() {
+function PoliciesContent() {
   const [state, setState] = useState<DemoState | null>(null);
   const [text, setText] = useState("");
   const [threshold, setThreshold] = useState(500);
@@ -67,19 +68,20 @@ export default function Policies() {
     try {
       const intent = await api.saveIntent(text, threshold);
       setState((s) => (s ? { ...s, intent } : s));
-      setSaved(`Signed and saved at ${new Date(intent.created_at).toLocaleTimeString()}.`);
-    } catch (e) {
-      setError((e as Error).message);
+      setSaved(intent.id);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Failed to save intent.");
     }
   }
 
-  if (!state) return <main className={`${PAGE} py-10 text-ink-2`}>Loading policies…</main>;
+  if (!state) return <main className={`${PAGE} py-10 text-neutral-500`}>Loading policies…</main>;
+
   const dirty = text !== state.intent.text || threshold !== state.intent.threshold_usd;
   const quarantined = state.components.filter((c) => c.status === "quarantined").length;
 
   return (
-    <main className={`${PAGE} space-y-12 py-10`}>
-      <PageHeader kicker="Policies" title="What your agent is allowed to do">
+    <main className={`${PAGE} space-y-10 py-8 bg-white text-black`}>
+      <PageHeader kicker="Policies · Cryptographic Intent" title="What your agent is allowed to do">
         Maya&apos;s intent and the rules Sudibran enforces on every payment, whatever the AI reads or is told.
       </PageHeader>
 
@@ -87,8 +89,8 @@ export default function Policies() {
         {/* Intent */}
         <section>
           <SectionTitle title="Maya's intent">Signed by Sudibran. Every payment is checked against it.</SectionTitle>
-          <Panel className="p-6">
-            <label htmlFor="intent-text" className="text-[14px] font-semibold">
+          <Panel className="p-6 border border-neutral-200 bg-white">
+            <label htmlFor="intent-text" className="text-xs font-mono uppercase tracking-wider text-black font-semibold block">
               Standing instruction
             </label>
             <textarea
@@ -99,14 +101,14 @@ export default function Policies() {
                 setSaved(null);
               }}
               rows={2}
-              className="mt-1.5 w-full resize-none rounded-lg border border-rule bg-paper px-3.5 py-2.5 text-[16px]"
+              className="mt-2 w-full resize-none rounded-lg border border-neutral-300 bg-white p-3 font-mono text-sm text-black focus:outline-none focus:border-black transition-colors"
             />
 
-            <div className="mt-6 flex items-baseline justify-between">
-              <label htmlFor="threshold" className="text-[14px] font-semibold">
+            <div className="mt-5 flex items-baseline justify-between">
+              <label htmlFor="threshold" className="text-sm font-semibold text-neutral-800">
                 Ask me before paying more than
               </label>
-              <span className="display text-[30px] tabular-nums">{usd(threshold).replace(".00", "")}</span>
+              <span className="text-2xl font-bold text-black tabular-nums">{usd(threshold).replace(".00", "")}</span>
             </div>
             <input
               id="threshold"
@@ -119,41 +121,41 @@ export default function Policies() {
                 setThreshold(Number(e.target.value));
                 setSaved(null);
               }}
-              className="mt-2 w-full accent-ink"
+              className="mt-2 w-full accent-black cursor-pointer"
             />
-            <div className="flex justify-between text-[12px] text-ink-3">
+            <div className="flex justify-between text-xs font-mono text-neutral-500">
               <span>$150</span>
               <span>$600</span>
             </div>
 
-            <div className="mt-6 flex flex-wrap items-center gap-3 border-t border-rule pt-5">
+            <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-neutral-200 pt-4">
               <Button variant="primary" onClick={save} disabled={!dirty || !text.trim()}>
-                Sign and save intent
+                Sign and save intent ↗
               </Button>
-              {saved && <span className="text-[14px] font-medium text-safe">✓ {saved}</span>}
+              {saved && <span className="text-xs font-mono text-black font-semibold">✓ {saved}</span>}
               {!saved && !dirty && state.intent.signed && <Tag tone="safe">✓ Signed · {state.intent.id}</Tag>}
-              {dirty && <span className="text-[13px] text-ink-2">Unsaved changes</span>}
+              {dirty && <span className="text-xs font-mono text-neutral-500">Unsaved changes</span>}
             </div>
-            {error && <p className="mt-2 text-[14px] text-harm">{error}</p>}
+            {error && <p className="mt-2 text-xs text-black font-mono">{error}</p>}
           </Panel>
 
           <div className="mt-6">
             <SectionTitle title="Suppliers on file">R2: the payee always comes from here.</SectionTitle>
-            <Panel className="overflow-hidden">
-              <table className="w-full text-left text-[14px]">
-                <thead className="bg-paper/60 text-[12.5px] text-ink-2">
-                  <tr className="border-b border-rule">
-                    <th className="px-5 py-2.5 font-semibold">Supplier</th>
+            <Panel className="overflow-hidden border border-neutral-200 bg-white">
+              <table className="w-full text-left text-sm">
+                <thead className="bg-neutral-50 text-xs text-neutral-600 border-b border-neutral-200">
+                  <tr>
+                    <th className="px-4 py-2.5 font-semibold">Supplier</th>
                     <th className="px-3 py-2.5 font-semibold">Account</th>
-                    <th className="px-5 py-2.5 text-right font-semibold">CRS</th>
+                    <th className="px-4 py-2.5 text-right font-semibold">CRS</th>
                   </tr>
                 </thead>
                 <tbody>
                   {state.suppliers.map((s) => (
-                    <tr key={s.id} className="border-b border-rule last:border-0">
-                      <td className="px-5 py-3 font-semibold">{s.name}</td>
-                      <td className="px-3 py-3 font-mono text-[13px] text-ink-2">{s.account_masked}</td>
-                      <td className="px-5 py-3 text-right">
+                    <tr key={s.id} className="border-b border-neutral-200 last:border-0">
+                      <td className="px-4 py-3 font-semibold text-black">{s.name}</td>
+                      <td className="px-3 py-3 font-mono text-xs text-neutral-600">{s.account_masked}</td>
+                      <td className="px-4 py-3 text-right">
                         <Tag tone="safe">✓ {s.crs}</Tag>
                       </td>
                     </tr>
@@ -167,17 +169,17 @@ export default function Policies() {
         {/* Rules */}
         <section>
           <SectionTitle title="Rules Sudibran enforces">Hard rules, not filters. They decide whether a payment is possible at all.</SectionTitle>
-          <Panel className="overflow-hidden">
+          <Panel className="overflow-hidden border border-neutral-200 bg-white">
             <ol>
               {RULES.map((r) => (
-                <li key={r.id} className="flex gap-4 border-b border-rule px-5 py-4 last:border-0">
-                  <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-ink font-mono text-[13px] font-bold text-white">{r.id}</span>
+                <li key={r.id} className="flex gap-3.5 border-b border-neutral-200 px-4 py-3.5 last:border-0">
+                  <span className="grid size-8 shrink-0 place-items-center rounded bg-neutral-100 border border-neutral-300 font-mono text-xs font-bold text-black">{r.id}</span>
                   <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                      <h3 className="text-[16px] font-bold">{r.id === "R1" ? `${r.name}: ${usd(state.intent.threshold_usd).replace(".00", "")}` : r.name}</h3>
-                      <span className="text-[12.5px] text-ink-3">{r.layer}</span>
+                    <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
+                      <h3 className="text-sm font-bold text-black">{r.id === "R1" ? `${r.name}: ${usd(state.intent.threshold_usd).replace(".00", "")}` : r.name}</h3>
+                      <span className="text-xs text-neutral-500">{r.layer}</span>
                     </div>
-                    <p className="mt-0.5 text-[14.5px] leading-snug text-ink-2">{r.does}</p>
+                    <p className="mt-0.5 text-xs text-neutral-600 leading-relaxed">{r.does}</p>
                   </div>
                   <span className="self-start">
                     <Tag tone="safe">✓ Enforced</Tag>
@@ -193,8 +195,8 @@ export default function Policies() {
         <SectionTitle
           title="Connected components"
           actions={
-            <span className="text-[13.5px] text-ink-2">
-              {state.components.length - quarantined} verified{quarantined > 0 && <span className="font-semibold text-harm"> · {quarantined} quarantined</span>}
+            <span className="text-xs text-neutral-600">
+              {state.components.length - quarantined} verified{quarantined > 0 && <span className="font-semibold text-black"> · {quarantined} quarantined</span>}
             </span>
           }
         >
@@ -207,5 +209,13 @@ export default function Policies() {
         </ul>
       </section>
     </main>
+  );
+}
+
+export default function Policies() {
+  return (
+    <ClientGuard pageTitle="Standing Policy Guardrails">
+      <PoliciesContent />
+    </ClientGuard>
   );
 }

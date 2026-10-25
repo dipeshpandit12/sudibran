@@ -7,6 +7,7 @@ import { NODE_LABEL, RULE_LABEL } from "@/lib/labels";
 import type { EvidenceReport, RunResult } from "@/lib/types";
 import { PAGE, PageHeader, Stat } from "@/components/PageHeader";
 import { Panel, PaymentChip, Tag } from "@/components/ui";
+import { ClientGuard } from "@/components/ClientGuard";
 
 type Filter = "all" | "stopped" | "review" | "paid";
 
@@ -24,7 +25,7 @@ const FILTERS: { id: Filter; label: string }[] = [
   { id: "paid", label: "Paid" },
 ];
 
-export default function AuditTrail() {
+function AuditTrailContent() {
   const [runs, setRuns] = useState<RunResult[] | null>(null);
   const [events, setEvents] = useState(0);
   const [chain, setChain] = useState<EvidenceReport["chain"] | null>(null);
@@ -101,7 +102,7 @@ export default function AuditTrail() {
           ) : runs.length === 0 ? (
             <p className="px-5 py-10 text-center text-[15px] text-ink-2">
               Nothing recorded yet.{" "}
-              <Link href="/#test" className="font-semibold text-ink underline decoration-ink-3 underline-offset-2">
+              <Link href="/dashboard" className="font-semibold text-ink underline decoration-ink-3 underline-offset-2">
                 Test an injection from the dashboard
               </Link>{" "}
               and its report will appear here.
@@ -167,3 +168,12 @@ export default function AuditTrail() {
     </main>
   );
 }
+
+export default function AuditTrail() {
+  return (
+    <ClientGuard pageTitle="Audit Trail Ledger">
+      <AuditTrailContent />
+    </ClientGuard>
+  );
+}
+
