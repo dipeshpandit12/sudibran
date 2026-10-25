@@ -45,6 +45,24 @@ require_command() {
   fi
 }
 
+# A stopped Docker Desktop leaves its socket file behind, so `docker info`
+# connects to a socket nobody is listening on and blocks there indefinitely
+# instead of failing. Without a deadline of its own this check hangs, and the
+# advice below never gets printed. macOS has no coreutils `timeout`.
+docker_responds() {
+  local probe watchdog
+  docker info >/dev/null 2>&1 &
+  probe=$!
+  ( sleep 10; kill -TERM "${probe}" >/dev/null 2>&1 ) >/dev/null 2>&1 &
+  watchdog=$!
+  if wait "${probe}" >/dev/null 2>&1; then
+    kill -TERM "${watchdog}" >/dev/null 2>&1 || true
+    return 0
+  fi
+  kill -TERM "${watchdog}" >/dev/null 2>&1 || true
+  return 1
+}
+
 wait_for_url() {
   local label="$1"
   local url="$2"
@@ -93,8 +111,10 @@ check_env_files
 require_command docker
 require_command curl
 
-if ! docker info >/dev/null 2>&1; then
-  echo "Docker is not running. Start Docker Desktop and try again." >&2
+if ! docker_responds; then
+  echo "Docker is not responding, so neither the backend nor the frontend can start." >&2
+  echo "  Start Docker Desktop, wait for its status to settle, then run this again." >&2
+  echo "  Check it yourself with: docker info" >&2
   exit 1
 fi
 
