@@ -34,7 +34,7 @@ export function Controls({
   return (
     <div className="relative">
       <Button onClick={() => setOpen((o) => !o)} pressed={open}>
-        Controls{active > 0 && <span className="rounded-full bg-flag px-1.5 text-[11px] text-white">{active}</span>}
+        Controls{active > 0 && <span className="rounded-full bg-flag px-1.5 text-[11px] text-onink">{active}</span>}
       </Button>
       {open && (
         <>

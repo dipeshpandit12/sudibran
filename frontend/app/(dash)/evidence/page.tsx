@@ -53,7 +53,7 @@ export default function AuditTrail() {
   const shown = (runs ?? []).filter((r) => filter === "all" || outcomeOf(r) === filter);
 
   return (
-    <main className={`${PAGE} page-in space-y-8 py-10`}>
+    <main className={`${PAGE} page-in space-y-8`}>
       <PageHeader kicker="Audit trail" title="Every decision, on the record">
         One report per run, built from a tamper-evident chain of every check Sudibran made. Open any run to see why it was
         allowed, held or stopped.
@@ -88,7 +88,7 @@ export default function AuditTrail() {
               onClick={() => setFilter(f.id)}
               aria-pressed={filter === f.id}
               className={`rounded-full border px-3.5 py-1.5 text-[13.5px] font-semibold transition-colors ${
-                filter === f.id ? "border-ink bg-ink text-white" : "border-rule bg-surface text-ink-2 hover:border-ink-3 hover:text-ink"
+                filter === f.id ? "border-ink bg-ink text-onink" : "border-rule bg-surface text-ink-2 hover:border-ink-3 hover:text-ink"
               }`}
             >
               {f.label} · {counts[f.id]}
@@ -102,8 +102,8 @@ export default function AuditTrail() {
           ) : runs.length === 0 ? (
             <p className="px-5 py-10 text-center text-[15px] text-ink-2">
               Nothing recorded yet.{" "}
-              <Link href="/#test" className="font-semibold text-ink underline decoration-ink-3 underline-offset-2">
-                Test an injection from the dashboard
+              <Link href="/dashboard#test" className="font-semibold text-ink underline decoration-ink-3 underline-offset-2">
+                Test an injection on the protection flow
               </Link>{" "}
               and its report will appear here.
             </p>

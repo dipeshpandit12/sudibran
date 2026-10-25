@@ -31,7 +31,7 @@ export default function Payments() {
 
   const refresh = useCallback(async () => setState(await api.state()), []);
 
-  // Poll so runs started from the dashboard show up here too.
+  // Poll so runs started on the protection flow show up here too.
   useEffect(() => {
     refresh();
     const id = window.setInterval(refresh, 2500);
@@ -68,7 +68,7 @@ export default function Payments() {
         </Banner>
       )}
 
-      <main className={`${PAGE} page-in space-y-8 py-10`}>
+      <main className={`${PAGE} page-in space-y-8`}>
         <PageHeader
           kicker="Payments"
           title="Accounts payable"
@@ -128,7 +128,7 @@ export default function Payments() {
               <SectionTitle title="Payments">Every payment the agent attempted, allowed or not, with the reason.</SectionTitle>
               <Panel className="overflow-hidden">
                 {state.payments.length === 0 ? (
-                  <Empty>No payments yet. Simulate an invoice above, or run an attack from the dashboard.</Empty>
+                  <Empty>No payments yet. Simulate an invoice above, or run an attack on the protection flow.</Empty>
                 ) : (
                   <table className="w-full text-left text-[14px]">
                     <thead className="bg-paper/60 text-[12.5px] text-ink-2">
@@ -220,7 +220,7 @@ export default function Payments() {
             <Reveal variant="right" delay={90}>
             <Panel className="flex flex-col overflow-hidden">
               <div className="flex items-center gap-3 border-b border-rule px-5 py-3">
-                <span className="grid size-8 place-items-center rounded-full bg-ink text-[12px] font-bold text-white">AP</span>
+                <span className="grid size-8 place-items-center rounded-full bg-ink text-[12px] font-bold text-onink">AP</span>
                 <div className="leading-tight">
                   <p className="text-[15px] font-bold">Payments assistant</p>
                   <p className="text-[12px] text-ink-2">Every action is checked by Sudibran</p>
@@ -234,7 +234,7 @@ export default function Payments() {
                         m.from === "maya"
                           ? m.untrusted
                             ? "rounded-br-md border-2 border-dashed border-flag bg-flag-wash"
-                            : "rounded-br-md bg-ink text-white"
+                            : "rounded-br-md bg-ink text-onink"
                           : m.from === "sudibran"
                             ? "rounded-tl-md border border-safe-line bg-safe-wash"
                             : "rounded-tl-md border border-rule bg-surface"

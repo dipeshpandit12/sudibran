@@ -79,7 +79,7 @@ export default function Policies() {
   const quarantined = state.components.filter((c) => c.status === "quarantined").length;
 
   return (
-    <main className={`${PAGE} page-in space-y-12 py-10`}>
+    <main className={`${PAGE} page-in space-y-12`}>
       <PageHeader kicker="Policies" title="What your agent is allowed to do">
         Maya&apos;s intent and the rules Sudibran enforces on every payment, whatever the AI reads or is told.
       </PageHeader>
@@ -172,7 +172,7 @@ export default function Policies() {
             <Reveal as="ol" stagger step={55}>
               {RULES.map((r) => (
                 <li key={r.id} className="row-hover flex gap-4 border-b border-rule px-5 py-4 last:border-0 hover:bg-paper/40">
-                  <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-ink font-mono text-[13px] font-bold text-white">{r.id}</span>
+                  <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-ink font-mono text-[13px] font-bold text-onink">{r.id}</span>
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                       <h3 className="text-[16px] font-bold">{r.id === "R1" ? `${r.name}: ${usd(state.intent.threshold_usd).replace(".00", "")}` : r.name}</h3>

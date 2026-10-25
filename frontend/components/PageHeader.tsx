@@ -36,4 +36,5 @@ export function SectionTitle({ title, children, actions }: { title: string; chil
   );
 }
 
-export const PAGE = "mx-auto w-full max-w-[1280px] px-6";
+/** Fill the column. The gutter and max width come from the surrounding layout. */
+export const PAGE = "w-full min-w-0";
