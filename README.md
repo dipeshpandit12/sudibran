@@ -19,8 +19,7 @@ A security and audit layer that sits between an AI agent and the money.
 
 ### ▶️ Watch the demo
 
-<!-- TODO: swap VIDEO_ID for the real YouTube id once the demo is uploaded -->
-[![Watch the Sudibran demo — one injection, two agents, nine stages](docs/screenshots/protection_flow.png)](https://youtu.be/VIDEO_ID)
+[<img src="docs/screenshots/demo-thumbnail.jpg" alt="Watch the Sudibran demo — one injection, two agents, nine stages" width="800" />](https://youtu.be/XCeVWWUZDLM)
 
 </div>
 
