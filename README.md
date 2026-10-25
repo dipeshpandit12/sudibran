@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src="docs/screenshots/logo.png" alt="Sudibran" width="202" />
+<img src="docs/screenshots/logo.png" alt="Sudibran logo" width="180" />
 
-#
+# Sudibran
 
 ### The black box for AI financial actions.
 

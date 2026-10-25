@@ -24,7 +24,7 @@ export function isDashRoute(path: string) {
 export function Wordmark() {
   return (
     <span className="flex items-center gap-2.5">
-      <Image src="/favicon-32x32.png" alt="" width={22} height={22} className="rounded-[5px]" />
+      <Image src="/logo.png" alt="" width={22} height={22} className="rounded-[5px] object-contain" />
       <span className="display text-[19px]">Sudibran</span>
     </span>
   );
