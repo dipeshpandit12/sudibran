@@ -52,15 +52,12 @@ export function Hero() {
             <span>Built on the agentic-AI defense landscape, Kim et al.</span>
           </p>
 
-          <h1 className="display mt-6 text-[clamp(42px,6.4vw,76px)] leading-[1.02]">
+          <h1 className="display mt-6 text-[clamp(40px,5.8vw,72px)] leading-[1.02]">
             <span className="line-clip block">
-              <span>Your AI agent</span>
-            </span>
-            <span className="line-clip block">
-              <span style={{ "--d": "110ms" } as CSSProperties}>pays the bills now.</span>
+              <span className="sm:whitespace-nowrap">Protect AI agents</span>
             </span>
             <span className="line-clip block text-ink-2">
-              <span style={{ "--d": "220ms" } as CSSProperties}>Who checks it?</span>
+              <span className="sm:whitespace-nowrap" style={{ "--d": "110ms" } as CSSProperties}>from cyberattacks.</span>
             </span>
           </h1>
 
