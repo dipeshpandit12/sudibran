@@ -3,7 +3,7 @@ import type { CSSProperties, ReactNode } from "react";
 /** The same opening on every page: what this is, in a sentence, and what you can do. */
 export function PageHeader({ kicker, title, children, actions }: { kicker: string; title: string; children?: ReactNode; actions?: ReactNode }) {
   return (
-    <header className="flex flex-wrap items-end justify-between gap-6">
+    <header className="relative z-20 flex flex-wrap items-end justify-between gap-6">
       <div className="intro min-w-0">
         <p className="text-[15px] font-semibold text-safe">{kicker}</p>
         <h1 className="display mt-2 text-[44px] leading-[1.04]">{title}</h1>
@@ -36,4 +36,5 @@ export function SectionTitle({ title, children, actions }: { title: string; chil
   );
 }
 
-export const PAGE = "mx-auto w-full max-w-[1280px] px-6";
+/** Fill the column. The gutter and max width come from the surrounding layout. */
+export const PAGE = "w-full min-w-0";
