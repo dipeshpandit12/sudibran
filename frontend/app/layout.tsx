@@ -24,6 +24,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${archivo.variable} ${jbmono.variable} antialiased`}>
       <body className="flex min-h-screen flex-col">
+        {/* Reveals hide their content until JavaScript scrolls them in; without it, show everything. */}
+        <noscript>
+          <style>{`.reveal,.stagger>*{opacity:1!important;animation:none!important}`}</style>
+        </noscript>
         <TopNav />
         {children}
         <footer className="mt-auto border-t border-rule bg-surface">
