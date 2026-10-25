@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="docs/screenshots/logo.png" alt="Sudibran logo" width="180" />
+<img src="docs/screenshots/logo.png" alt="Sudibran logo " width="180" />
 
 # Sudibran
 
