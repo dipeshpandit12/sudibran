@@ -165,7 +165,7 @@ export default function Overview() {
         <div className="mx-auto w-full max-w-[1280px] px-6 py-20">
           <Reveal stagger step={90}>
             <p className="text-[15px] font-semibold text-safe">Our solution</p>
-            <h2 className="display mt-2 max-w-[22ch] text-[52px] leading-[1.03]">So we built Sudibran: the research blueprint as a working trust layer.</h2>
+            <h2 className="display mt-2 max-w-[22ch] text-[52px] leading-[1.03]">So we built Sudibran: a security layer for AI agents.</h2>
           </Reveal>
           <Reveal stagger step={90} className="mt-8 grid gap-x-10 gap-y-6 md:grid-cols-2 xl:grid-cols-4">
             {[
@@ -204,12 +204,6 @@ export default function Overview() {
               >
                 Open dashboard
               </Link>
-              <a
-                href="mailto:hello@sudibran.dev"
-                className="rounded-full border border-rule bg-paper px-6 py-3 text-[15px] font-semibold transition-colors hover:border-ink-3"
-              >
-                hello@sudibran.dev
-              </a>
             </div>
           </Reveal>
 

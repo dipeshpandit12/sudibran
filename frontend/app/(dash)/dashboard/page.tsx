@@ -208,7 +208,8 @@ export default function Dashboard() {
     return q;
   }, [state]);
 
-  const liveNode = play.events[Math.max(0, play.shown - 1)]?.node ?? null;
+  // Only while the run is playing; once it is done the stopping stage speaks for itself.
+  const liveNode = play.done ? null : (play.events[Math.max(0, play.shown - 1)]?.node ?? null);
   const chapter = run ? (BY_ID[run.scenario_id] ?? null) : null;
   const approval = run?.protected.approval_id ? (state?.approvals.find((a) => a.id === run.protected.approval_id) ?? null) : null;
   const pin = pinned && pinned.key === play.key ? pinned.i : null;
