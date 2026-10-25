@@ -64,7 +64,7 @@ export function AgentChatAnimation() {
         <p className="self-center text-[12px] text-ink-3">Today 9:41</p>
 
         {sent && (
-          <div className="step-in max-w-[78%] self-end rounded-2xl rounded-br-md bg-ink px-4 py-2.5 text-[15px] text-white">{REQUEST}</div>
+          <div className="step-in max-w-[78%] self-end rounded-2xl rounded-br-md bg-ink px-4 py-2.5 text-[15px] text-onink">{REQUEST}</div>
         )}
 
         {sent && (
@@ -85,7 +85,7 @@ export function AgentChatAnimation() {
                     <li key={s.label} className="step-in flex items-center gap-2.5 text-[13.5px]">
                       <span
                         className={`grid size-5 shrink-0 place-items-center rounded-full text-[11px] font-bold ${
-                          running ? "border-2 border-safe border-t-transparent animate-spin motion-reduce:animate-none" : "bg-safe text-white"
+                          running ? "border-2 border-safe border-t-transparent animate-spin motion-reduce:animate-none" : "bg-safe text-onink"
                         }`}
                       >
                         {running ? "" : "✓"}
@@ -146,7 +146,7 @@ export function AgentChatAnimation() {
             <span className="text-ink-3">Message your assistant</span>
           )}
         </div>
-        <span className={`grid size-10 place-items-center rounded-full text-[17px] font-bold text-white transition-colors ${!sent && typed.length === REQUEST.length ? "bg-ink" : "bg-rule"}`}>
+        <span className={`grid size-10 place-items-center rounded-full text-[17px] font-bold text-onink transition-colors ${!sent && typed.length === REQUEST.length ? "bg-ink" : "bg-rule"}`}>
           ↑
         </span>
       </div>

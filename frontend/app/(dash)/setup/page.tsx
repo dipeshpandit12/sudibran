@@ -6,6 +6,7 @@ import { usd } from "@/lib/labels";
 import type { Component, DemoState } from "@/lib/types";
 import { PAGE, PageHeader, SectionTitle } from "@/components/PageHeader";
 import { Button, Panel, Tag } from "@/components/ui";
+import { Reveal } from "@/components/Reveal";
 
 const TYPE_LABEL: Record<Component["type"], string> = {
   model: "Model",
@@ -29,7 +30,7 @@ const RULES: { id: string; name: string; does: string; layer: string }[] = [
 function ComponentCard({ c }: { c: Component }) {
   const bad = c.status === "quarantined";
   return (
-    <li className={`flex flex-col rounded-xl border-2 bg-surface p-4 ${bad ? "border-dashed border-harm" : "border-rule"}`}>
+    <li className={`lift flex flex-col rounded-xl border-2 bg-surface p-4 ${bad ? "border-dashed border-harm" : "border-rule"}`}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-[12.5px] font-medium text-ink-3">{TYPE_LABEL[c.type]}</p>
@@ -78,14 +79,14 @@ export default function Policies() {
   const quarantined = state.components.filter((c) => c.status === "quarantined").length;
 
   return (
-    <main className={`${PAGE} space-y-12 py-10`}>
+    <main className={`${PAGE} page-in space-y-12`}>
       <PageHeader kicker="Policies" title="What your agent is allowed to do">
         Maya&apos;s intent and the rules Sudibran enforces on every payment, whatever the AI reads or is told.
       </PageHeader>
 
       <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
         {/* Intent */}
-        <section>
+        <Reveal as="section" variant="left">
           <SectionTitle title="Maya's intent">Signed by Sudibran. Every payment is checked against it.</SectionTitle>
           <Panel className="p-6">
             <label htmlFor="intent-text" className="text-[14px] font-semibold">
@@ -137,7 +138,7 @@ export default function Policies() {
             {error && <p className="mt-2 text-[14px] text-harm">{error}</p>}
           </Panel>
 
-          <div className="mt-6">
+          <Reveal className="mt-6" delay={80}>
             <SectionTitle title="Suppliers on file">R2: the payee always comes from here.</SectionTitle>
             <Panel className="overflow-hidden">
               <table className="w-full text-left text-[14px]">
@@ -150,7 +151,7 @@ export default function Policies() {
                 </thead>
                 <tbody>
                   {state.suppliers.map((s) => (
-                    <tr key={s.id} className="border-b border-rule last:border-0">
+                    <tr key={s.id} className="row-hover border-b border-rule last:border-0 hover:bg-paper/40">
                       <td className="px-5 py-3 font-semibold">{s.name}</td>
                       <td className="px-3 py-3 font-mono text-[13px] text-ink-2">{s.account_masked}</td>
                       <td className="px-5 py-3 text-right">
@@ -161,17 +162,17 @@ export default function Policies() {
                 </tbody>
               </table>
             </Panel>
-          </div>
-        </section>
+          </Reveal>
+        </Reveal>
 
         {/* Rules */}
-        <section>
+        <Reveal as="section" variant="right">
           <SectionTitle title="Rules Sudibran enforces">Hard rules, not filters. They decide whether a payment is possible at all.</SectionTitle>
           <Panel className="overflow-hidden">
-            <ol>
+            <Reveal as="ol" stagger step={55}>
               {RULES.map((r) => (
-                <li key={r.id} className="flex gap-4 border-b border-rule px-5 py-4 last:border-0">
-                  <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-ink font-mono text-[13px] font-bold text-white">{r.id}</span>
+                <li key={r.id} className="row-hover flex gap-4 border-b border-rule px-5 py-4 last:border-0 hover:bg-paper/40">
+                  <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-ink font-mono text-[13px] font-bold text-onink">{r.id}</span>
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                       <h3 className="text-[16px] font-bold">{r.id === "R1" ? `${r.name}: ${usd(state.intent.threshold_usd).replace(".00", "")}` : r.name}</h3>
@@ -184,12 +185,12 @@ export default function Policies() {
                   </span>
                 </li>
               ))}
-            </ol>
+            </Reveal>
           </Panel>
-        </section>
+        </Reveal>
       </div>
 
-      <section>
+      <Reveal as="section">
         <SectionTitle
           title="Connected components"
           actions={
@@ -200,12 +201,12 @@ export default function Policies() {
         >
           Every model, tool and outside agent is fingerprinted when it connects. If it changes later, it&apos;s quarantined before it runs.
         </SectionTitle>
-        <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <Reveal as="ul" stagger variant="pop" step={60} className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {state.components.map((c) => (
             <ComponentCard key={c.id} c={c} />
           ))}
-        </ul>
-      </section>
+        </Reveal>
+      </Reveal>
     </main>
   );
 }

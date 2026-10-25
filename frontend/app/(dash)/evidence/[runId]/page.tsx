@@ -9,6 +9,7 @@ import { LAYER_LABEL, LAYER_ORDER, NODE_LABEL, RULE_LABEL } from "@/lib/labels";
 import type { AuditEvent, EvidenceReport, Layer } from "@/lib/types";
 import { Button, DecisionChip, PaymentChip, Panel, Tag } from "@/components/ui";
 import { PAGE, PageHeader } from "@/components/PageHeader";
+import { Reveal } from "@/components/Reveal";
 
 function ChainCheck({ report }: { report: EvidenceReport }) {
   const [events, setEvents] = useState<AuditEvent[]>(report.decisions);
@@ -37,7 +38,7 @@ function ChainCheck({ report }: { report: EvidenceReport }) {
       <div className="flex items-start gap-4">
         <span
           aria-hidden
-          className={`grid size-11 shrink-0 place-items-center rounded-full text-[22px] font-bold text-white ${ok ? "bg-safe" : "bg-harm"}`}
+          className={`grid size-11 shrink-0 place-items-center rounded-full text-[22px] font-bold text-onink ${ok ? "bg-safe" : "bg-harm"}`}
         >
           {ok ? "✓" : "✗"}
         </span>
@@ -116,7 +117,7 @@ export default function EvidencePage() {
   const o = report.outcome;
 
   return (
-    <main className={`${PAGE} space-y-8 py-10`}>
+    <main className={`${PAGE} page-in space-y-8`}>
       <nav aria-label="Breadcrumb" className="text-[13.5px] text-ink-2">
         <Link href="/evidence" className="font-semibold text-ink underline decoration-ink-3 underline-offset-2">
           Audit trail
@@ -128,8 +129,8 @@ export default function EvidencePage() {
         title={report.title}
         actions={
           <>
-            <Link href="/" className="rounded-lg border border-rule bg-surface px-3.5 py-2 text-[14px] font-semibold hover:bg-sunk">
-              Back to dashboard
+            <Link href="/dashboard" className="rounded-lg border border-rule bg-surface px-3.5 py-2 text-[14px] font-semibold transition-colors hover:bg-sunk">
+              Back to the flow
             </Link>
             <Button variant="primary" onClick={download}>
               Download JSON
@@ -148,8 +149,11 @@ export default function EvidencePage() {
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,8fr)_minmax(0,4fr)]">
         <div className="min-w-0 space-y-5">
-          <ChainCheck key={report.run_id} report={report} />
+          <Reveal variant="pop">
+            <ChainCheck key={report.run_id} report={report} />
+          </Reveal>
 
+          <Reveal delay={60}>
           <Panel>
             <div className="border-b border-rule px-5 py-3">
               <h2 className="text-[16px] font-bold">Every check, in order</h2>
@@ -158,7 +162,7 @@ export default function EvidencePage() {
                 <button
                   onClick={() => setLayer("all")}
                   aria-pressed={layer === "all"}
-                  className={`rounded-full border px-3 py-1 text-[13px] font-semibold ${layer === "all" ? "border-ink bg-ink text-white" : "border-rule bg-surface text-ink-2 hover:bg-sunk"}`}
+                  className={`rounded-full border px-3 py-1 text-[13px] font-semibold transition-colors ${layer === "all" ? "border-ink bg-ink text-onink" : "border-rule bg-surface text-ink-2 hover:bg-sunk"}`}
                 >
                   All · {report.decisions.length}
                 </button>
@@ -170,8 +174,8 @@ export default function EvidencePage() {
                       onClick={() => setLayer(l)}
                       disabled={n === 0}
                       aria-pressed={layer === l}
-                      className={`rounded-full border px-3 py-1 text-[13px] font-semibold disabled:opacity-40 ${
-                        layer === l ? "border-ink bg-ink text-white" : "border-rule bg-surface text-ink-2 hover:bg-sunk"
+                      className={`rounded-full border px-3 py-1 text-[13px] font-semibold transition-colors disabled:opacity-40 ${
+                        layer === l ? "border-ink bg-ink text-onink" : "border-rule bg-surface text-ink-2 hover:bg-sunk"
                       }`}
                     >
                       {LAYER_LABEL[l]} · {n}
@@ -180,9 +184,9 @@ export default function EvidencePage() {
                 })}
               </div>
             </div>
-            <ol>
+            <Reveal as="ol" stagger step={45}>
               {rows.map((e) => (
-                <li key={e.seq} className="grid grid-cols-[44px_minmax(0,1fr)] gap-x-3 border-b border-rule px-5 py-3 last:border-0">
+                <li key={e.seq} className="row-hover grid grid-cols-[44px_minmax(0,1fr)] gap-x-3 border-b border-rule px-5 py-3 last:border-0 hover:bg-paper/40">
                   <span className="wide pt-0.5 text-right text-[14px] font-bold text-ink-3">#{e.seq}</span>
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
@@ -203,11 +207,12 @@ export default function EvidencePage() {
                   </div>
                 </li>
               ))}
-            </ol>
+            </Reveal>
           </Panel>
+          </Reveal>
         </div>
 
-        <aside className="min-w-0 space-y-5">
+        <Reveal as="aside" stagger variant="right" step={70} className="min-w-0 space-y-5">
           <Panel className="p-5">
             <h2 className="text-[16px] font-bold">Outcome</h2>
             <div className="mt-2 flex items-center gap-3">
@@ -281,7 +286,7 @@ export default function EvidencePage() {
               {report.switches.audit_down ? "down" : "up"}
             </p>
           </Panel>
-        </aside>
+        </Reveal>
       </div>
     </main>
   );

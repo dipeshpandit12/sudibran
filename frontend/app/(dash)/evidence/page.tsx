@@ -7,6 +7,7 @@ import { NODE_LABEL, RULE_LABEL } from "@/lib/labels";
 import type { EvidenceReport, RunResult } from "@/lib/types";
 import { PAGE, PageHeader, Stat } from "@/components/PageHeader";
 import { Panel, PaymentChip, Tag } from "@/components/ui";
+import { Reveal } from "@/components/Reveal";
 
 type Filter = "all" | "stopped" | "review" | "paid";
 
@@ -52,13 +53,13 @@ export default function AuditTrail() {
   const shown = (runs ?? []).filter((r) => filter === "all" || outcomeOf(r) === filter);
 
   return (
-    <main className={`${PAGE} space-y-8 py-10`}>
+    <main className={`${PAGE} page-in space-y-8`}>
       <PageHeader kicker="Audit trail" title="Every decision, on the record">
         One report per run, built from a tamper-evident chain of every check Sudibran made. Open any run to see why it was
         allowed, held or stopped.
       </PageHeader>
 
-      <section aria-label="Summary" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <Reveal as="section" aria-label="Summary" stagger step={80} className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <Stat label="Runs recorded" value={String(counts.all)} note="This session" />
         <Stat label="Checks recorded" value={String(events)} note="One event per check (R8)" />
         <Stat
@@ -77,9 +78,9 @@ export default function AuditTrail() {
           }
         />
         <Stat label="Stopped by Sudibran" value={String(counts.stopped)} note={`${counts.review} held for review`} />
-      </section>
+      </Reveal>
 
-      <section>
+      <Reveal as="section" delay={60}>
         <div className="mb-3 flex flex-wrap gap-1.5" role="group" aria-label="Filter runs">
           {FILTERS.map((f) => (
             <button
@@ -87,7 +88,7 @@ export default function AuditTrail() {
               onClick={() => setFilter(f.id)}
               aria-pressed={filter === f.id}
               className={`rounded-full border px-3.5 py-1.5 text-[13.5px] font-semibold transition-colors ${
-                filter === f.id ? "border-ink bg-ink text-white" : "border-rule bg-surface text-ink-2 hover:border-ink-3 hover:text-ink"
+                filter === f.id ? "border-ink bg-ink text-onink" : "border-rule bg-surface text-ink-2 hover:border-ink-3 hover:text-ink"
               }`}
             >
               {f.label} · {counts[f.id]}
@@ -101,8 +102,8 @@ export default function AuditTrail() {
           ) : runs.length === 0 ? (
             <p className="px-5 py-10 text-center text-[15px] text-ink-2">
               Nothing recorded yet.{" "}
-              <Link href="/#test" className="font-semibold text-ink underline decoration-ink-3 underline-offset-2">
-                Test an injection from the dashboard
+              <Link href="/dashboard#test" className="font-semibold text-ink underline decoration-ink-3 underline-offset-2">
+                Test an injection on the protection flow
               </Link>{" "}
               and its report will appear here.
             </p>
@@ -125,7 +126,7 @@ export default function AuditTrail() {
                   const p = r.protected;
                   const t = p.events[0]?.time;
                   return (
-                    <tr key={r.run_id} className="border-b border-rule last:border-0 hover:bg-paper/50">
+                    <tr key={r.run_id} className="row-hover border-b border-rule last:border-0 hover:bg-paper/50">
                       <td className="px-5 py-3">
                         <Link href={`/evidence/${r.run_id}`} className="font-mono text-[13px] font-semibold underline decoration-ink-3 underline-offset-2">
                           {r.run_id}
@@ -163,7 +164,7 @@ export default function AuditTrail() {
             </table>
           )}
         </Panel>
-      </section>
+      </Reveal>
     </main>
   );
 }

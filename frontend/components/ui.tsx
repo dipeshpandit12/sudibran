@@ -75,10 +75,10 @@ export function Button({
   pressed?: boolean;
 }) {
   const styles = {
-    primary: "bg-ink text-white hover:bg-ink/90 border-ink",
+    primary: "bg-ink text-onink hover:bg-ink/90 border-ink",
     ghost: "bg-surface text-ink hover:bg-sunk border-rule",
     danger: "bg-surface text-harm hover:bg-harm-wash border-harm-line",
-    safe: "bg-safe text-white hover:bg-safe/90 border-safe",
+    safe: "bg-safe text-onink hover:bg-safe/90 border-safe",
   };
   return (
     <button

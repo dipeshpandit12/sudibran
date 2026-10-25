@@ -7,7 +7,7 @@ function Switch({ label, hint, on, onChange }: { label: string; hint: string; on
   return (
     <button role="switch" aria-checked={on} onClick={() => onChange(!on)} className="flex w-full items-start gap-3 rounded-lg px-2 py-2 text-left hover:bg-sunk">
       <span className={`relative mt-0.5 h-[18px] w-8 shrink-0 rounded-full transition-colors ${on ? "bg-ink" : "bg-rule"}`}>
-        <span className={`absolute top-[2px] size-[14px] rounded-full bg-white transition-[left] ${on ? "left-[16px]" : "left-[2px]"}`} />
+        <span className={`absolute top-[2px] size-[14px] rounded-full transition-[left] ${on ? "left-[16px] bg-onink" : "left-[2px] bg-ink-3"}`} />
       </span>
       <span>
         <span className="block text-[14px] font-semibold">{label}</span>
@@ -34,7 +34,7 @@ export function Controls({
   return (
     <div className="relative">
       <Button onClick={() => setOpen((o) => !o)} pressed={open}>
-        Controls{active > 0 && <span className="rounded-full bg-flag px-1.5 text-[11px] text-white">{active}</span>}
+        Controls{active > 0 && <span className="rounded-full bg-flag px-1.5 text-[11px] text-onink">{active}</span>}
       </Button>
       {open && (
         <>
