@@ -240,8 +240,8 @@ export default function Dashboard() {
         {/* The pipeline, both lanes, before anything is sent. */}
         <Reveal as="section">
           <SectionTitle title="The pipeline">
-            Nine stages between Maya&apos;s sentence and her bank. Each one is somewhere an attacker can write, and somewhere
-            Sudibran puts a check.
+            Nine stages between Maya&apos;s sentence and her bank. The top track is a normal agent; the bottom one is the same
+            stages with a Sudibran gate on each. Pick a stage to see both sides of it.
           </SectionTitle>
           <FlowSteps active={liveNode} caught={run?.protected.caught_at ?? null} />
         </Reveal>
