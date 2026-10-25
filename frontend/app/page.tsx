@@ -19,6 +19,7 @@ import { DecisionPanel } from "@/components/DecisionPanel";
 import { ApprovalCard } from "@/components/ApprovalCard";
 import { Controls } from "@/components/Controls";
 import { Banner, Button, Panel } from "@/components/ui";
+import { Reveal } from "@/components/Reveal";
 
 const CHAPTERS = chaptersJson as Chapter[];
 const THREATS = CHAPTERS.filter((c) => c.kind === "threat");
@@ -251,11 +252,15 @@ export default function Dashboard() {
 
       {/* 1 · How an AI agent works */}
       <section className="mx-auto w-full max-w-[1280px] px-6 pb-16 pt-14">
-        <p className="text-[15px] font-semibold text-ink-2">How an AI agent works</p>
-        <h1 className="display mt-2 max-w-[22ch] text-[48px] leading-[1.03]">A normal AI agent works like this.</h1>
+        <Reveal stagger step={90}>
+          <p className="text-[15px] font-semibold text-ink-2">How an AI agent works</p>
+          <h1 className="display mt-2 max-w-[22ch] text-[48px] leading-[1.03]">A normal AI agent works like this.</h1>
+        </Reveal>
         <div className="mt-8 grid items-start gap-8 xl:grid-cols-[minmax(0,8fr)_minmax(0,4fr)]">
-          <PaperFigure src={fig1} n={1} alt="Fig. 1 from Kim et al.: an AI agent with a user interface, LLM and agent workflow, memory, actions, and tools reaching an external environment of web, computer, domain-specific environments, third-party services and external RAG." />
-          <dl className="space-y-5">
+          <Reveal variant="left">
+            <PaperFigure src={fig1} n={1} alt="Fig. 1 from Kim et al.: an AI agent with a user interface, LLM and agent workflow, memory, actions, and tools reaching an external environment of web, computer, domain-specific environments, third-party services and external RAG." />
+          </Reveal>
+          <Reveal as="dl" stagger step={80} className="space-y-5">
             {[
               ["User interface", "Where Maya asks for something and approves it."],
               ["LLM and agent workflow", "Plans the job and decides each next action."],
@@ -268,12 +273,12 @@ export default function Dashboard() {
                 <dd className="mt-0.5 text-[15px] leading-relaxed text-ink-2">{b}</dd>
               </div>
             ))}
-          </dl>
+          </Reveal>
         </div>
       </section>
 
       <section className="mx-auto grid w-full max-w-[1280px] items-center gap-12 px-6 pb-20 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
-        <div>
+        <Reveal stagger step={110}>
           <p className="inline-flex items-center gap-2 rounded-full bg-safe-wash px-3 py-1 text-[13px] font-semibold text-safe">
             <span className="size-2 rounded-full bg-safe" />
             For example
@@ -283,26 +288,32 @@ export default function Dashboard() {
             Maya types one sentence. Her agent reads the invoice, looks up the payee, checks the account and pays it, calling a
             different MCP tool or service at every step. It takes seconds.
           </p>
-        </div>
-        <AgentChatAnimation />
+        </Reveal>
+        <Reveal variant="right">
+          <AgentChatAnimation />
+        </Reveal>
       </section>
 
       {/* 2 · The risk */}
       <section id="what-if" className="scroll-mt-4 border-y border-rule bg-surface">
         <div className="mx-auto w-full max-w-[1280px] px-6 py-20">
-          <p className="text-[15px] font-semibold text-harm">The risk</p>
-          <h2 className="display mt-2 max-w-[20ch] text-[54px] leading-[1.03]">This works. But what if one of these steps is attacked?</h2>
-          <p className="mt-5 max-w-[66ch] text-[18px] leading-relaxed text-ink-2">
-            Every step reads something it didn&apos;t write. An attacker only needs to slip one line into any of them, and the
-            agent carries the risk all the way to Maya&apos;s bank account.
-          </p>
+          <Reveal stagger step={90}>
+            <p className="text-[15px] font-semibold text-harm">The risk</p>
+            <h2 className="display mt-2 max-w-[20ch] text-[54px] leading-[1.03]">This works. But what if one of these steps is attacked?</h2>
+            <p className="mt-5 max-w-[66ch] text-[18px] leading-relaxed text-ink-2">
+              Every step reads something it didn&apos;t write. An attacker only needs to slip one line into any of them, and the
+              agent carries the risk all the way to Maya&apos;s bank account.
+            </p>
+          </Reveal>
           <div className="mt-10 grid items-start gap-8 xl:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
-            <PaperFigure src={fig2} n={2} alt="Fig. 2 from Kim et al.: attack vectors such as direct and indirect prompt injection, tool poisoning, model poisoning and memory poisoning, and risks such as private data leakage and unauthorized actions, placed on the agent's structure." />
-            <div>
+            <Reveal variant="left">
+              <PaperFigure src={fig2} n={2} alt="Fig. 2 from Kim et al.: attack vectors such as direct and indirect prompt injection, tool poisoning, model poisoning and memory poisoning, and risks such as private data leakage and unauthorized actions, placed on the agent's structure." />
+            </Reveal>
+            <Reveal variant="right">
               <p className="text-[14px] font-semibold text-ink-2">What that looks like for Maya</p>
-              <ul className="mt-3 divide-y divide-rule rounded-xl border border-rule bg-paper/40">
+              <Reveal as="ul" stagger step={55} className="mt-3 divide-y divide-rule rounded-xl border border-rule bg-paper/40">
                 {RISKS.map((r) => (
-                  <li key={r.attack} className="flex items-center gap-3 px-4 py-2.5">
+                  <li key={r.attack} className="row-hover flex items-center gap-3 px-4 py-2.5 hover:bg-surface">
                     <span className="w-8 shrink-0 font-mono text-[12.5px] font-bold text-harm">{r.code}</span>
                     <span className="min-w-0 flex-1">
                       <span className="block text-[14px] font-semibold">{r.name}</span>
@@ -310,45 +321,51 @@ export default function Dashboard() {
                     </span>
                     <button
                       onClick={() => choose(r.attack, true)}
-                      className="shrink-0 rounded-lg border border-harm-line bg-surface px-2.5 py-1 text-[12.5px] font-semibold text-harm hover:border-harm"
+                      className="shrink-0 rounded-lg border border-harm-line bg-surface px-2.5 py-1 text-[12.5px] font-semibold text-harm transition-colors hover:border-harm hover:bg-harm-wash"
                     >
                       Try it
                     </button>
                   </li>
                 ))}
-              </ul>
-            </div>
+              </Reveal>
+            </Reveal>
           </div>
         </div>
       </section>
 
       {/* 3 · The research */}
       <section className="mx-auto w-full max-w-[1280px] px-6 py-20">
-        <p className="text-[15px] font-semibold text-safe">The research</p>
-        <h2 className="display mt-2 max-w-[24ch] text-[46px] leading-[1.04]">So we looked at how to do better.</h2>
-        <p className="mt-4 max-w-[70ch] text-[18px] leading-relaxed text-ink-2">
-          Researchers at UC Berkeley, SNU, UIUC and UCSB mapped where an AI agent can be defended. Their finding:{" "}
-          <strong className="text-ink">security belongs at every layer of an agent, not only at the end.</strong>
-        </p>
+        <Reveal stagger step={90}>
+          <p className="text-[15px] font-semibold text-safe">The research</p>
+          <h2 className="display mt-2 max-w-[24ch] text-[46px] leading-[1.04]">So we looked at how to do better.</h2>
+          <p className="mt-4 max-w-[70ch] text-[18px] leading-relaxed text-ink-2">
+            Researchers at UC Berkeley, SNU, UIUC and UCSB mapped where an AI agent can be defended. Their finding:{" "}
+            <strong className="text-ink">security belongs at every layer of an agent, not only at the end.</strong>
+          </p>
+        </Reveal>
         <div className="mt-10 grid items-start gap-8 xl:grid-cols-[minmax(0,8fr)_minmax(0,4fr)]">
-          <PaperFigure src={fig4} n={4} alt="Fig. 4 from Kim et al.: defenses placed on every part of the agent, including input and output guardrails, information flow control, monitoring, human-in-the-loop validation, privilege separation, formal verification, identity, credential and access management, and model and tool hardening." />
-          <dl className="space-y-6">
+          <Reveal variant="left">
+            <PaperFigure src={fig4} n={4} alt="Fig. 4 from Kim et al.: defenses placed on every part of the agent, including input and output guardrails, information flow control, monitoring, human-in-the-loop validation, privilege separation, formal verification, identity, credential and access management, and model and tool hardening." />
+          </Reveal>
+          <Reveal as="dl" stagger step={90} className="space-y-6">
             {FAMILIES.map(([t, c, b]) => (
               <div key={t} className="border-l-4 pl-4" style={{ borderColor: c }}>
                 <dt className="text-[17px] font-bold">{t}</dt>
                 <dd className="mt-1 text-[15px] leading-relaxed text-ink-2">{b}</dd>
               </div>
             ))}
-          </dl>
+          </Reveal>
         </div>
       </section>
 
       {/* 4 · Sudibran */}
       <section className="border-y border-rule bg-surface">
         <div className="mx-auto w-full max-w-[1280px] px-6 py-20">
-          <p className="text-[15px] font-semibold text-safe">Our solution</p>
-          <h2 className="display mt-2 max-w-[22ch] text-[52px] leading-[1.03]">So we built Sudibran: the research blueprint as a working trust layer.</h2>
-          <div className="mt-8 grid gap-x-10 gap-y-6 md:grid-cols-2 xl:grid-cols-4">
+          <Reveal stagger step={90}>
+            <p className="text-[15px] font-semibold text-safe">Our solution</p>
+            <h2 className="display mt-2 max-w-[22ch] text-[52px] leading-[1.03]">So we built Sudibran: the research blueprint as a working trust layer.</h2>
+          </Reveal>
+          <Reveal stagger step={90} className="mt-8 grid gap-x-10 gap-y-6 md:grid-cols-2 xl:grid-cols-4">
             {[
               ["A check on every layer", "If one check is fooled, the next one still holds."],
               ["Hard rules decide, not filters", "A payee always comes from your supplier records, whatever the AI read."],
@@ -360,17 +377,17 @@ export default function Dashboard() {
                 <p className="mt-1.5 text-[15px] leading-relaxed text-ink-2">{b}</p>
               </div>
             ))}
-          </div>
-          <div className="mt-10">
+          </Reveal>
+          <Reveal variant="pop" className="mt-10">
             <ArchitectureMap />
-          </div>
+          </Reveal>
         </div>
       </section>
 
       {/* 5 · Test it */}
       <section ref={testRef} id="test" className="scroll-mt-4 border-t border-rule bg-surface/40">
         <div className="mx-auto w-full max-w-[1280px] px-6 py-20">
-        <div className="flex flex-wrap items-end justify-between gap-4">
+        <Reveal stagger step={120} className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <h2 className="display text-[40px] leading-tight">Test an injection yourself</h2>
             <p className="mt-2 max-w-[70ch] text-[16.5px] text-ink-2">
@@ -379,9 +396,10 @@ export default function Dashboard() {
             </p>
           </div>
           {state && <Controls state={state} checks={checks} onSwitch={setSwitch} onReset={reset} />}
-        </div>
+        </Reveal>
 
-        <Panel className="mt-8 p-5">
+        <Reveal className="mt-8" delay={60}>
+        <Panel className="p-5">
           <div className="flex flex-wrap gap-1.5" role="group" aria-label="Known injections">
             {THREATS.map((t) => (
               <button
@@ -430,6 +448,7 @@ export default function Dashboard() {
           </div>
           {error && <p className="mt-3 text-[14px] text-harm">{error}</p>}
         </Panel>
+        </Reveal>
 
         <div ref={resultRef} className="scroll-mt-4">
           {run && (

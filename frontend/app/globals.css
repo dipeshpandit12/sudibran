@@ -134,3 +134,91 @@ body {
 .react-flow__attribution { display: none; }
 .react-flow__node { cursor: pointer; }
 .react-flow__handle { opacity: 0; pointer-events: none; }
+
+/* ---------------------------------------------------------------------------
+   Page motion: the entrance of a page, and the reveal of each block as it is
+   scrolled to. Blocks start hidden and play once. <Reveal> adds .in when the
+   element first crosses into the viewport; .stagger walks its own children.
+   Everything here is opt-in via a class, so nothing moves unless it's asked to.
+   --------------------------------------------------------------------------- */
+
+@keyframes reveal-up { from { opacity: 0; transform: translate3d(0, 22px, 0); } to { opacity: 1; transform: none; } }
+@keyframes reveal-left { from { opacity: 0; transform: translate3d(-28px, 0, 0); } to { opacity: 1; transform: none; } }
+@keyframes reveal-right { from { opacity: 0; transform: translate3d(28px, 0, 0); } to { opacity: 1; transform: none; } }
+@keyframes reveal-pop { from { opacity: 0; transform: scale(0.965); } to { opacity: 1; transform: none; } }
+@keyframes reveal-fade { from { opacity: 0; } to { opacity: 1; } }
+
+.reveal,
+.stagger > * {
+  opacity: 0;
+}
+.reveal.in,
+.stagger.in > * {
+  animation: reveal-up 620ms cubic-bezier(0.22, 0.78, 0.28, 1) both;
+  animation-delay: var(--d, 0ms);
+}
+.reveal-left.in { animation-name: reveal-left; }
+.reveal-right.in { animation-name: reveal-right; }
+.reveal-pop.in { animation-name: reveal-pop; }
+.reveal-fade.in { animation-name: reveal-fade; }
+
+/* One group, its children arriving in source order. --step tunes the gap. */
+.stagger.in > *:nth-child(1) { animation-delay: calc(var(--d, 0ms) + 0 * var(--step, 70ms)); }
+.stagger.in > *:nth-child(2) { animation-delay: calc(var(--d, 0ms) + 1 * var(--step, 70ms)); }
+.stagger.in > *:nth-child(3) { animation-delay: calc(var(--d, 0ms) + 2 * var(--step, 70ms)); }
+.stagger.in > *:nth-child(4) { animation-delay: calc(var(--d, 0ms) + 3 * var(--step, 70ms)); }
+.stagger.in > *:nth-child(5) { animation-delay: calc(var(--d, 0ms) + 4 * var(--step, 70ms)); }
+.stagger.in > *:nth-child(6) { animation-delay: calc(var(--d, 0ms) + 5 * var(--step, 70ms)); }
+.stagger.in > *:nth-child(7) { animation-delay: calc(var(--d, 0ms) + 6 * var(--step, 70ms)); }
+.stagger.in > *:nth-child(8) { animation-delay: calc(var(--d, 0ms) + 7 * var(--step, 70ms)); }
+.stagger.in > *:nth-child(9) { animation-delay: calc(var(--d, 0ms) + 8 * var(--step, 70ms)); }
+.stagger.in > *:nth-child(10) { animation-delay: calc(var(--d, 0ms) + 9 * var(--step, 70ms)); }
+.stagger.in > *:nth-child(11) { animation-delay: calc(var(--d, 0ms) + 10 * var(--step, 70ms)); }
+.stagger.in > *:nth-child(n + 12) { animation-delay: calc(var(--d, 0ms) + 11 * var(--step, 70ms)); }
+.stagger-left.in > * { animation-name: reveal-left; }
+.stagger-right.in > * { animation-name: reveal-right; }
+.stagger-pop.in > * { animation-name: reveal-pop; }
+.stagger-fade.in > * { animation-name: reveal-fade; }
+
+/* A page arriving. Runs on mount, so it plays on every route change. */
+@keyframes page-in { from { opacity: 0; transform: translate3d(0, 10px, 0); } to { opacity: 1; transform: none; } }
+.page-in { animation: page-in 420ms cubic-bezier(0.22, 0.78, 0.28, 1) both; }
+
+/* The opening lines of a page header, in reading order. */
+@keyframes intro-up { from { opacity: 0; transform: translate3d(0, 14px, 0); } to { opacity: 1; transform: none; } }
+.intro > * { animation: intro-up 560ms cubic-bezier(0.22, 0.78, 0.28, 1) both; }
+.intro > *:nth-child(1) { animation-delay: calc(var(--d, 0ms) + 40ms); }
+.intro > *:nth-child(2) { animation-delay: calc(var(--d, 0ms) + 130ms); }
+.intro > *:nth-child(3) { animation-delay: calc(var(--d, 0ms) + 220ms); }
+.intro > *:nth-child(n + 4) { animation-delay: calc(var(--d, 0ms) + 310ms); }
+
+/* Cards that answer the pointer. */
+.lift {
+  transition:
+    transform 220ms cubic-bezier(0.22, 0.78, 0.28, 1),
+    box-shadow 220ms ease-out,
+    border-color 220ms ease-out;
+}
+.lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 26px -16px color-mix(in srgb, var(--color-ink) 55%, transparent);
+  border-color: var(--color-ink-3);
+}
+
+/* Table and list rows, lit on hover without shifting the layout. */
+.row-hover { transition: background-color 160ms ease-out; }
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .stagger > *,
+  .reveal.in,
+  .stagger.in > *,
+  .page-in,
+  .intro > * {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+  .lift { transition: none; }
+  .lift:hover { transform: none; }
+}
